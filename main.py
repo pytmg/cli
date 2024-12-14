@@ -70,12 +70,8 @@ while True:
             # Add functions here
             if SelectedIndex == 0:
                 print("Hello, World!")
-                Refresh() # Always add `Refresh()` AFTER any print statements.
-                continue # Always add `continue` otherwise it'll refresh without printing anything.
             if SelectedIndex == 1:
                 print("Creator: TMG")
-                Refresh()
-                continue
             # Required
             if SelectedIndex == len(MenuItems)-1:
                 break
