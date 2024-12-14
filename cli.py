@@ -54,15 +54,15 @@ class CLI:
         while True:
             event = keyboard.read_event(suppress=True)
             if event.event_type == keyboard.KEY_DOWN:
-                if event.name == "down":
+                if event.scan_code == 80:
                     self.selected_index += 1
                     self.selected_index %= len(self.menu_items)
                     self.refresh()
-                elif event.name == "up":
+                elif event.scan_code == 72:
                     self.selected_index -= 1
                     self.selected_index %= len(self.menu_items)
                     self.refresh()
-                elif event.name == "enter":
+                elif event.scan_code == 28:
                     # Check for the function at the selected index
                     if self.selected_index == len(self.menu_items) - 1:
                         break
