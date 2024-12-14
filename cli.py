@@ -27,19 +27,19 @@ class CLI:
     def print(self, *args, **kwargs):
         """Override the default print to update print statement."""
         self.print_statement = " ".join(args)
-        __builtins__.print(*args, **kwargs)
+        print(*args, **kwargs)
 
     def refresh(self):
         """Refresh the screen with updated menu."""
         self.cls()
-        __builtins__.print(self.title)
+        print(self.title)
         for i, item in enumerate(self.menu_items):
             formatted_item = item
             for color in self.colours:
                 formatted_item = formatted_item.replace(color, self.colours[color]).replace("/reset/", f"{ansi.color.bg.white}{ansi.color.fg.black}" if i == self.selected_index else f"{ansi.color.fx.reset}")
-            __builtins__.print(f"{f'{ansi.color.bg.white}{ansi.color.fg.black}>' if i == self.selected_index else ' '} {formatted_item}" + f"{ansi.color.fx.reset}")
-        __builtins__.print("Use UP and DOWN arrow to navigate, press ENTER to select.")
-        __builtins__.print(self.print_statement)
+            print(f"{f'{ansi.color.bg.white}{ansi.color.fg.black}>' if i == self.selected_index else ' '} {formatted_item}" + f"{ansi.color.fx.reset}")
+        print("Use UP and DOWN arrow to navigate, press ENTER to select.")
+        print(self.print_statement)
 
     @staticmethod
     def cls():
