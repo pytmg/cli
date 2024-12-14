@@ -16,7 +16,7 @@ class CLI:
         }
         self.print_statement = ""
 
-    def addFunction(self, idx, func, args=()):
+    def addFunction(self, idx, func, *args):
         """Add a new function to the CLI menu."""
         self.functions[idx] = (func, args)
 
@@ -52,7 +52,7 @@ class CLI:
         self.refresh()
 
         while True:
-            event = keyboard.read_event()
+            event = keyboard.read_event(suppress=True)
             if event.event_type == keyboard.KEY_DOWN:
                 if event.name == "down":
                     self.selected_index += 1
