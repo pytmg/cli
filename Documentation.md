@@ -20,6 +20,10 @@ from cli import CLI
 
 `cli` is the main file, and the `CLI` class is actually required for the script.
 
+### Modules
+
+Modules are handled by `cli.py`, if you don't have them, it will prompt you to install them.
+
 That's it!
 
 ## Usage
