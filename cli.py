@@ -1,6 +1,14 @@
-import os
-import keyboard
-import ansi
+try:
+    import os
+    import keyboard
+    import ansi
+except ModuleNotFoundError:
+    if input("You do not have the required modules, would you like to install them? (Y/n)\n> ").lower().startswith("y"):
+        os.system("pip install keyboard ansi")
+        input("Done!\nPress enter to quit.")
+        exit()
+    else:
+        exit()
 
 class CLI:
     def __init__(self, title="Test"):
