@@ -1,6 +1,6 @@
 from cli import CLI
 
-cli = CLI()
+cli = CLI(title="Example CLI Menu")
 
 cli.addItem("Say \"Hello, World\"!")
 
