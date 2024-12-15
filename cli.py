@@ -86,7 +86,7 @@ class CLI:
                 formatted_item = formatted_item.replace(color, self.colours[color]).replace("/reset/", f"{ansi.color.bg.white}{ansi.color.fg.black}" if i == self.selected_index else f"{ansi.color.fx.reset}")
             print(f"{f'{ansi.color.bg.white}{ansi.color.fg.black}>' if i == self.selected_index else ' '} {formatted_item}" + f"{ansi.color.fx.reset}")
         print("Use UP and DOWN arrow to navigate, press ENTER to select.")
-        print(self.print_statement, end="" if not self.print_statement else "\r")
+        print(self.print_statement, end="\r")
 
     @staticmethod
     def cls():
