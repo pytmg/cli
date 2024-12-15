@@ -6,4 +6,6 @@ Really easy to use, you just download `cli.py`, use `from cli import CLI` and ha
 
 ---
 
+Documentation: [Documentation.md](./Documentation.md)
+
 LICENSE: [Ideal License (ILi)](./LICENSE)

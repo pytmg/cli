@@ -1,6 +1,15 @@
-import os
-import keyboard
-import ansi
+try:
+    import os
+    import keyboard
+    import ansi
+except ModuleNotFoundError:
+    if input("You do not have the required modules to run this.\nInstall now? (Y/n)\n> ").lower().startswith("y"):
+        import os
+        os.system("pip install ansi keyboard")
+        input("Done!\nPress enter to close.")
+        exit()
+    else:
+        exit()
 
 class CLI:
     def __init__(self, title="Test"):
@@ -13,6 +22,8 @@ class CLI:
             "/b red/": f"{ansi.color.bg.red}",
             "/f green/": f"{ansi.color.fg.green}",
             "/b green/": f"{ansi.color.bg.green}",
+            "/f yellow/": f"{ansi.color.fg.yellow}",
+            "/b yellow/": f"{ansi.color.bg.yellow}"
         }
         self.print_statement = ""
 
