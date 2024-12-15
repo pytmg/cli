@@ -6,7 +6,7 @@ So, I've created my own CLI Menu script that is actually really easy to use.
 
 Get the `cli.py` file from [here](https://raw.githubusercontent.com/pytmg/cli/refs/heads/main/cli.py)
 
-Put it in the same directory as your main file, or a sub-directory if you want
+Place it in the same directory as your script or in a specific folder you want to organize your dependencies.
 
 ```python
 from Dependencies.cli import CLI
@@ -89,6 +89,10 @@ You can also navigate to `Exit` and it'll exit gracefully.
 ### Submenus
 
 I know, I know, you really want to know how to use submenus and that is FULLY understandable..
+
+Why would you need sub-menus?
+
+- If there's too much to put in one menu
 
 Here's how
 
