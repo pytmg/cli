@@ -23,12 +23,40 @@ class CLI:
             "/f green/": f"{ansi.color.fg.green}",
             "/b green/": f"{ansi.color.bg.green}",
             "/f yellow/": f"{ansi.color.fg.yellow}",
-            "/b yellow/": f"{ansi.color.bg.yellow}"
+            "/b yellow/": f"{ansi.color.bg.yellow}",
+            "/f blue/": f"{ansi.color.fg.blue}",
+            "/b blue/": f"{ansi.color.bg.blue}",
+            "/f magenta/": f"{ansi.color.fg.magenta}",
+            "/b magenta/": f"{ansi.color.bg.magenta}",
+            "/f cyan/": f"{ansi.color.fg.cyan}",
+            "/b cyan/": f"{ansi.color.bg.cyan}",
+            "/f white/": f"{ansi.color.fg.white}",
+            "/b white/": f"{ansi.color.bg.white}",
+            "/f black/": f"{ansi.color.fg.black}",
+            "/b black/": f"{ansi.color.bg.black}",
+            "/f gray/": f"{ansi.color.fg.gray}",
+            "/b gray/": f"{ansi.color.bg.gray}",
+            "/f bright_red/": f"{ansi.color.fg.brightred}",
+            "/b bright_red/": f"{ansi.color.bg.brightred}",
+            "/f bright_green/": f"{ansi.color.fg.brightgreen}",
+            "/b bright_green/": f"{ansi.color.bg.brightgreen}",
+            "/f bright_yellow/": f"{ansi.color.fg.brightyellow}",
+            "/b bright_yellow/": f"{ansi.color.bg.brightyellow}",
+            "/f bright_blue/": f"{ansi.color.fg.brightblue}",
+            "/b bright_blue/": f"{ansi.color.bg.brightblue}",
+            "/f bright_magenta/": f"{ansi.color.fg.brightmagenta}",
+            "/b bright_magenta/": f"{ansi.color.bg.brightmagenta}",
+            "/f bright_cyan/": f"{ansi.color.fg.brightcyan}",
+            "/b bright_cyan/": f"{ansi.color.bg.brightcyan}",
+            "/f bright_white/": f"{ansi.color.fg.brightwhite}",
+            "/b bright_white/": f"{ansi.color.bg.brightwhite}"
         }
         self.print_statement = ""
 
     def addFunction(self, idx, func, *args):
         """Add a new function to the CLI menu."""
+        if not callable(func):
+            raise ValueError(f"Argument 'func' must be callable, but got {type(func).__name__}.")
         self.functions[idx] = (func, args)
 
     def addItem(self, name: str):
