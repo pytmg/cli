@@ -1,14 +1,6 @@
-try:
-    import os
-    import keyboard
-    import ansi
-except ModuleNotFoundError:
-    if input("You do not have the required modules, would you like to install them? (Y/n)\n> ").lower().startswith("y"):
-        os.system("pip install keyboard ansi")
-        input("Done!\nPress enter to quit.")
-        exit()
-    else:
-        exit()
+import os
+import keyboard
+import ansi
 
 class CLI:
     def __init__(self, title="Test"):
@@ -30,7 +22,15 @@ class CLI:
 
     def addItem(self, name: str):
         """Add a new item to the CLI menu"""
-        self.menu_items += [name]
+        try:
+            if self.menu_items[-1] == "Exit":
+                self.menu_items.pop(-1)
+                self.menu_items += [name]
+                self.menu_items.append("Exit")
+            else:
+                self.menu_items += [name]
+        except IndexError:
+            self.menu_items += [name]
 
     def print(self, *args, **kwargs):
         """Override the default print to update print statement."""
