@@ -1,7 +1,29 @@
+"""
+A CLI Menu system module created by TMG.
+
+- Example Usage:
+
+    ```python
+    from cli import CLI
+
+    cli = CLI()
+
+    cli.addItem("Good morning!")
+
+    def goodMorning():
+    cli.print("Good Morning!")
+
+    cli.addFunction(0, goodMorning, ())
+
+    cli.run()
+    ```
+"""
+
 try:
     import os
     import keyboard
     import ansi
+    import random
 except ModuleNotFoundError:
     if input("You do not have the required modules to run this.\nInstall now? (Y/n)\n> ").lower().startswith("y"):
         import os
@@ -12,7 +34,16 @@ except ModuleNotFoundError:
         exit()
 
 class CLI:
-    def __init__(self, title="Test"):
+    """
+    The main class
+
+    ```py
+    cli = CLI(title="Example")
+    ```
+    """
+    def __init__(self, title="No Title Provided"):
+        self.running = False
+        self.exitMessage = str(random.uniform(-100, 100)) # For complete randomness of the initial Exit - Because of the custom exit message and custom exit function.
         self.title = title
         self.selected_index = 0
         self.menu_items = []
@@ -49,7 +80,10 @@ class CLI:
             "/f bright_cyan/": f"{ansi.color.fg.brightcyan}",
             "/b bright_cyan/": f"{ansi.color.bg.brightcyan}",
             "/f bright_white/": f"{ansi.color.fg.brightwhite}",
-            "/b bright_white/": f"{ansi.color.bg.brightwhite}"
+            "/b bright_white/": f"{ansi.color.bg.brightwhite}",
+            "/e bold/": f"{ansi.color.fx.bold}",
+            "/e underline/": f"{ansi.color.fx.underline}",
+            "/e italic/": f"{ansi.color.fx.italic}"
         }
         self.print_statement = ""
 
@@ -62,11 +96,18 @@ class CLI:
     def addItem(self, name: str):
         """Add a new item to the CLI menu"""
         try:
-            if self.menu_items[-1] == "Exit":
-                self.menu_items.pop(-1)
+            if self.menu_items[-1] == self.exitMessage:
+                temp = self.menu_items.pop(-1)
                 self.menu_items += [name]
-                self.menu_items.append("Exit")
+                self.menu_items.append(temp)
             else:
+                if name in self.menu_items:
+                    i = 1
+                    while True:
+                        i += 1
+                        if f"{name} ({i})" not in self.menu_items:
+                            name = f"{name} ({i})"
+                            break
                 self.menu_items += [name]
         except IndexError:
             self.menu_items += [name]
@@ -92,13 +133,19 @@ class CLI:
     def cls():
         """Clear the screen."""
         os.system("cls" if os.name == "nt" else "clear")
+    
+    def exit(self):
+        """Exit the current menu"""
+        self.running = False
 
-    def run(self):
+    def run(self, exitMessage: str = "Exit", exitFunction = None):
         """Run the CLI interface and handle user input."""
-        self.menu_items += ["Exit"]
+        self.exitMessage = exitMessage
+        self.running = True
+        self.menu_items += [exitMessage]
         self.refresh()
 
-        while True:
+        while self.running:
             event = keyboard.read_event(suppress=True)
             if event.event_type == keyboard.KEY_DOWN:
                 if event.scan_code == 80:
@@ -112,7 +159,10 @@ class CLI:
                 elif event.scan_code == 28:
                     # Check for the function at the selected index
                     if self.selected_index == len(self.menu_items) - 1:
-                        break
+                        if exitFunction:
+                            exitFunction()
+                        else:
+                            self.exit()
 
                     # Execute custom functions if any
                     if self.selected_index in self.functions:

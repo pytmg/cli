@@ -8,7 +8,7 @@ cli.addItem("Say \"Hello, User\"!")
 cli.addItem("Open a Submenu")
 cli.addItem("Show Current Time")
 cli.addItem("/f red/Add a New Item/reset/")
-cli.addItem("/f yellow/Exit Program/reset/")
+cli.addItem("Does /e underline//e bold//e italic/NOTHING/reset/")
 
 # 2. Functions for Menu Actions
 def sayHello():
@@ -25,7 +25,7 @@ def openSubmenu():
         submenu.print("This is a submenu!")
 
     submenu.addFunction(0, submenuOption1, ())
-    submenu.run()
+    submenu.run(exitMessage="Go back")
 
 cli.addFunction(1, openSubmenu, ())
 
@@ -38,7 +38,7 @@ cli.addFunction(2, showTime, ())
 
 # 2c. Dynamic Item Addition
 def addNewItem():
-    cli.print("Enter a name for the new item:")
+    print("Enter a name for the new item:")
     new_item = input("> ")
     cli.addItem(new_item)
     
@@ -46,22 +46,20 @@ def addNewItem():
         cli.print(f"You selected: {new_item}")
 
     cli.addFunction(len(cli.menu_items) - 2, newItemFunction, ())  # Bind function to the new item
+    cli.print(f"New item added: {new_item}")
 
 cli.addFunction(3, addNewItem, ())
 
 # 2d. Exit Confirmation
-def confirmExit():
-    cli.print("Are you sure you want to exit? (Y/n)")
+def confirmExit(): # No parameters as it will not matter
+    print("Are you sure you want to exit? (Y/n)")
     response = input("> ")
     if response.lower().startswith("y"):
-        cli.print("Goodbye!")
+        print("Goodbye!")
         time.sleep(1)
-        cli.cls()
-        exit()
+        cli.exit()
     else:
-        cli.print("Returning to the menu...")
+        cli.refresh()
 
-cli.addFunction(4, confirmExit, ())
-
-# 3. Run the Menu
-cli.run()
+# 3. Run the Menu with a custom "Exit" option
+cli.run(exitMessage="/f yellow/Exit/reset/", exitFunction=confirmExit)
