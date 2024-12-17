@@ -11,7 +11,7 @@ A CLI Menu system module created by TMG.
     cli.addItem("Good morning!")
 
     def goodMorning():
-    cli.print("Good Morning!")
+        cli.print("Good Morning!")
 
     cli.addFunction(0, goodMorning, ())
 
