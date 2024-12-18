@@ -8,16 +8,16 @@ A CLI Menu system module created by TMG.
 
     cli = CLI()
 
-    cli.addItem("Good morning!")
-
     def goodMorning():
         cli.print("Good Morning!")
 
-    cli.addFunction(0, goodMorning, ())
+    cli.addItem("Good morning!", goodMorning, ())
 
     cli.run()
     ```
 """
+
+DEBUG = False
 
 try:
     import os
@@ -91,7 +91,7 @@ class CLI:
         """Literally does nothing."""
         pass
 
-    def addItem(self, name: str, func = doNothing, args: tuple = ()):
+    def addItem(self, name: str, func, args: tuple = ()):
         """Add a new item to the CLI menu"""
         try:
             if self.menu_items[-1] == self.exitMessage:
@@ -99,7 +99,7 @@ class CLI:
                 self.menu_items += [name]
                 self.menu_items.append(temp)
             else:
-                idx = len(self.menu_items) - 1
+                idx = len(self.menu_items)
                 if name in self.menu_items:
                     i = 1
                     while True:
@@ -108,11 +108,11 @@ class CLI:
                             name = f"{name} ({i})"
                             break
                 self.menu_items += [name]
-                if not callable(func):
-                    raise ValueError(f"Argument 'func' must be callable, but got {type(func).__name__}.")
-                self.functions[idx] = (func, args)
+                self.functions[str(idx)] = (func, args)
         except IndexError:
+            idx = len(self.menu_items)
             self.menu_items += [name]
+            self.functions[str(idx)] = (func, args)
 
     def print(self, *args, **kwargs):
         """Override the default print to update print statement."""
@@ -167,11 +167,12 @@ class CLI:
                             self.exit()
 
                     # Execute custom functions if any
-                    if self.selected_index in self.functions:
-                        func, args = self.functions[self.selected_index]
-                        if args != ():
-                            func(args)
-                        else:
-                            func()
+                    if str(self.selected_index) in self.functions:
+                        func, args = self.functions[str(self.selected_index)]
+                        func(*args)
 
                     self.refresh()
+            
+            print(event.scan_code) if DEBUG else 0
+            print(self.selected_index) if DEBUG else 0
+            print(self.functions) if DEBUG else 0

@@ -5,14 +5,14 @@ cli = CLI(title="Enhanced CLI Menu")
 
 # 1. Function Creation
 def sayHello():
-    cli.print("Hello, User!")
+    cli.print("Hello, User")
 
 # 1a. Submenu Functionality
 def openSubmenu():
     submenu = CLI(title="Submenu")
 
     def submenuOption1():
-        submenu.print("This is a submenu!")
+        submenu.print(f"This is a submenu!")
 
     submenu.addItem("Submenu Option 1", submenuOption1, ())
     submenu.run(exitMessage="Go back") # Make the "Exit" message show as Go Back
