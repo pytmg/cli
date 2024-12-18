@@ -87,13 +87,11 @@ class CLI:
         }
         self.print_statement = ""
 
-    def addFunction(self, idx, func, *args):
-        """Add a new function to the CLI menu."""
-        if not callable(func):
-            raise ValueError(f"Argument 'func' must be callable, but got {type(func).__name__}.")
-        self.functions[idx] = (func, args)
+    def doNothing():
+        """Literally does nothing."""
+        pass
 
-    def addItem(self, name: str):
+    def addItem(self, name: str, func = doNothing, args: tuple = ()):
         """Add a new item to the CLI menu"""
         try:
             if self.menu_items[-1] == self.exitMessage:
@@ -101,6 +99,7 @@ class CLI:
                 self.menu_items += [name]
                 self.menu_items.append(temp)
             else:
+                idx = len(self.menu_items) - 1
                 if name in self.menu_items:
                     i = 1
                     while True:
@@ -109,6 +108,9 @@ class CLI:
                             name = f"{name} ({i})"
                             break
                 self.menu_items += [name]
+                if not callable(func):
+                    raise ValueError(f"Argument 'func' must be callable, but got {type(func).__name__}.")
+                self.functions[idx] = (func, args)
         except IndexError:
             self.menu_items += [name]
 
@@ -133,7 +135,7 @@ class CLI:
     def cls():
         """Clear the screen."""
         os.system("cls" if os.name == "nt" else "clear")
-    
+
     def exit(self):
         """Exit the current menu"""
         self.running = False
@@ -167,8 +169,8 @@ class CLI:
                     # Execute custom functions if any
                     if self.selected_index in self.functions:
                         func, args = self.functions[self.selected_index]
-                        if args[0] != ():
-                            func(*args)
+                        if args != ():
+                            func(args)
                         else:
                             func()
 
