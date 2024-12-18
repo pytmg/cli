@@ -10,12 +10,11 @@ def sayHello():
 # 1a. Submenu Functionality
 def openSubmenu():
     submenu = CLI(title="Submenu")
-    submenu.addItem("Submenu Option 1")
 
     def submenuOption1():
         submenu.print("This is a submenu!")
 
-    submenu.addFunction(0, submenuOption1, ())
+    submenu.addItem("Submenu Option 1", submenuOption1, ())
     submenu.run(exitMessage="Go back") # Make the "Exit" message show as Go Back
 
 # 1b. Show Current Time
@@ -27,12 +26,11 @@ def showTime():
 def addNewItem():
     print("Enter a name for the new item:")
     new_item = input("> ")
-    cli.addItem(new_item)
     
     def newItemFunction():
         cli.print(f"You selected: {new_item}")
 
-    cli.addFunction(len(cli.menu_items) - 2, newItemFunction, ())  # Bind function to the new item
+    cli.addItem(new_item, newItemFunction, ())
     cli.print(f"New item added: {new_item}")
 
 # 1. Add Main Menu Items
