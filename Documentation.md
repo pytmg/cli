@@ -2,6 +2,10 @@
 
 So, I've created my own CLI Menu script that is actually really easy to use.
 
+## What it is
+
+It's essentially just a CLI Menu script, like `GRUB` if you know what that is, which works by pressing either the up or down arrow keys and enter.
+
 ## Installation
 
 Get the `cli.py` file from [here](https://raw.githubusercontent.com/pytmg/cli/refs/heads/main/cli.py)
@@ -49,7 +53,12 @@ def HelloWorld():
 cli.addItem("Print \"Hello, World!\"", HelloWorld, ()) # name, function, parameters
 ```
 
-What this does is create an item called `Print "Hello, World!"` and it has a function called `HelloWorld` without parameters, and all it does is print `Hello, World!` when executed. Then it adds the function to that item by index, so if `Print "Hello, World!"` is the first thing you added, the index will be 0.
+> [!IMPORTANT]
+> Item creation was changed in the most recent update, so update your scripts if necessary.
+> <br>**What changed**:
+> - `addItem` and `addFunction` were merged, so rather than running `cli.addItem(name)` then `cli.addFunction(index, function, params)`, you can run `cli.addItem(name, function, params)`
+
+What this does is define a new function called `HelloWorld` that prints `"Hello, World!"` when run in the CLI, then creates a new item with the name `Print "Hello, World!"` with that function and no parameters.
 
 ### Running the script
 
@@ -59,7 +68,26 @@ To be able to run the script, you must run the `cli` object.
 cli.run()
 ```
 
-This runs the cli object with all the functions and items you have created
+---
+
+#### Creating a custom Exit function and name
+
+To create a custom function for the Exit, rather than outright exiting the current menu, you can just do something like this:
+
+```python
+def exitFunction(): # No parameters!!
+  if input("Are you sure? (Y/n)\n> ").lower().startswith("y"):
+    cli.exit()
+
+cli.run(exitFunction=exitFunction)
+```
+
+> [!TIP]
+> Add `cli.exit()` to your exit function to make it easier for the user to exit the menu. Without it, the user might get stuck in the menu or submenu.
+
+---
+
+This runs the cli object with all the functions and items you have created.
 
 You should be greeted with this once you run the script with Python.
 
@@ -79,6 +107,9 @@ My amazing CLI Script
 Use UP and DOWN arrow to navigate, press ENTER to select.
 Hello, World!
 ```
+
+> [!NOTE]
+> There is a bit of a flicker when printing something, but it isn't exactly noticable.
 
 You can also navigate to `Exit` and it'll exit gracefully.
 
