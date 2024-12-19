@@ -43,12 +43,10 @@ This initializes a CLI object with the title `My amazing CLI Script`, this will 
 To add a menu item, you're going to need a name and a function.
 
 ```python
-cli.addItem("Print \"Hello, World!\"")
-
 def HelloWorld():
     cli.print("Hello, World!") # Use cli.print() rather than print() so that it shows up
 
-cli.addFunction(0, HelloWorld, ()) # idx, function, parameters
+cli.addItem("Print \"Hello, World!\"", HelloWorld, ()) # name, function, parameters
 ```
 
 What this does is create an item called `Print "Hello, World!"` and it has a function called `HelloWorld` without parameters, and all it does is print `Hello, World!` when executed. Then it adds the function to that item by index, so if `Print "Hello, World!"` is the first thing you added, the index will be 0.
@@ -97,23 +95,21 @@ Why would you need sub-menus?
 Here's how
 
 ```python
-cli = CLI(title="Submenu Test")
+from cli import CLI # Import CLI from cli.py if it's within the same directory
 
-cli.addItem("Open submenu item")
+cli = CLI(title="Submenu Test")
 
 def submenu1():
     submenu = CLI(title="Submenu 1") # Initialize the submenu
 
-    submenu.addItem("Hello!") # Add an item
-
     def goodEvening(): # Function for the item
         submenu.print("Good evening") # Prints "Good evening"
 
-    submenu.addFunction(0, goodEvening, ()) # Adds the function to the item
+    submenu.addItem("Hello!", goodEvening, ()) # Add an item with the goodEvening function
 
     submenu.run() # Runs the submenu
 
-cli.addFunction(0, submenu1, ()) # Or whatever index it is
+cli.addItem("Open submenu item", submenu1, ())
 
 cli.run() # Run the main menu
 ```
