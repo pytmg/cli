@@ -1,2 +1,10 @@
-__pycache__/*
-TEST.py
+# Ignore everything
+/*
+
+# With exceptions
+!/cli.py
+!/Documentation.md
+!/example.py
+!/README.md
+!/LICENSE
+!/.gitignore
