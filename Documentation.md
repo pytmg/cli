@@ -8,9 +8,18 @@ It's essentially just a CLI Menu script, like `GRUB` if you know what that is, w
 
 ## Installation
 
-Get the `cli` folder from [here](https://raw.githubusercontent.com/pytmg/cli/refs/heads/main/cli)
+Download the `cli` GitHub Repository
 
-Place it in the same directory as your script or in a specific folder you want to organize your dependencies.
+- Using git
+  - `git clone https://github.com/pytmg/cli.git`
+- ZIP
+  - [Download pytmg/cli ZIP](https://github.com/pytmg/cli/archive/refs/heads/main.zip)
+  - and then extract it
+  
+> [!NOTE]
+> Use `git clone` as it lets you update easier using `git pull`
+
+Place the `cli` folder in the same directory as your script or in a specific folder you want to organize your dependencies.
 
 ```python
 from Dependencies.cli import CLI
