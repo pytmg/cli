@@ -2,9 +2,15 @@
 /*
 
 # With exceptions
-!/cli.py
+!/cli/
+!/cli/*
+
 !/Documentation.md
+
 !/example.py
+
 !/README.md
+
 !/LICENSE
+
 !/.gitignore
