@@ -169,7 +169,10 @@ class CLI:
                     # Execute custom functions if any
                     if str(self.selected_index) in self.functions:
                         func, args = self.functions[str(self.selected_index)]
-                        func(args)
+                        if args != ():
+                            func(args)
+                        else:
+                            func()
 
                     self.refresh()
             
