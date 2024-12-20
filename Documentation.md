@@ -8,7 +8,7 @@ It's essentially just a CLI Menu script, like `GRUB` if you know what that is, w
 
 ## Installation
 
-Get the `cli.py` file from [here](https://raw.githubusercontent.com/pytmg/cli/refs/heads/main/cli.py)
+Get the `cli` folder from [here](https://raw.githubusercontent.com/pytmg/cli/refs/heads/main/cli)
 
 Place it in the same directory as your script or in a specific folder you want to organize your dependencies.
 
