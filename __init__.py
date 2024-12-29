@@ -142,6 +142,13 @@ class CLI:
         """Exit the current menu"""
         self.running = False
 
+    def item(self, name):
+        """Decorator to add a new item to the CLI."""
+        def decorator(func):
+            self.addItem(name, func)
+            return func
+        return decorator
+
     def run(self, exitMessage: str = "Exit", exitFunction = None):
         """Run the CLI interface and handle user input."""
         self.exitMessage = exitMessage
