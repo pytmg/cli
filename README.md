@@ -17,13 +17,10 @@ Really easy to use, you just download the `cli` folder, use `from cli import CLI
   - Fixes when using `curses`
     - `curses` is built into Python
     - `curses` won't\* require root access
-    - `curses` won't\* take control of the keyboard throughout the whole system
+    - `curses` won't take control of the keyboard throughout the whole system
 
 > [!NOTE]
 > I haven't tested `curses` on UNIX systems yet, I will do that before releasing the new version.
-
-> [!NOTE]
-> I haven't tested keyboard input yet on `curses` - Will do soon
 
 ---
 
