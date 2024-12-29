@@ -10,3 +10,7 @@
 !/LICENSE
 !/.gitignore
 !/__main__.py
+
+# Ignore any and all pycache directories
+*/__pycache__/*
+*/__pycache__/
