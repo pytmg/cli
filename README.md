@@ -8,20 +8,25 @@ Really easy to use, you just download the `cli` folder, use `from cli import CLI
 
 ---
 
-**What to expect**:
-- Expect a new version where it uses `curses` rather than `keyboard` + `ansi` modules, for easier use and less obstruction.
-  - I'll aim to keep every function the exact same visually.
-  - Obstructions at the moment
-    - Needing to install `keyboard` and `ansi`
-    - `keyboard` requires root access on UNIX systems
-    - `keyboard` takes control of the keyboard entirely across the whole system, stopping other apps from taking input
-  - Fixes when using `curses`
-    - `curses` is built into Python
-    - `curses` won't\* require root access
-    - `curses` won't take control of the keyboard throughout the whole system
+## About CLI V2-beta
 
-> [!NOTE]
-> I haven't tested `curses` on UNIX systems yet, I will do that before releasing the new version.
+> Usage:
+> ```python
+> from cli.beta import CLI
+> ```
+> Changes are shown in `example.py`.
+
+It's still in beta, there's no documentation until it's fully done, and the only two things I have left to make are submenu support and coloured options, but is a LOT better than before.
+
+> [!WARNING]
+> Since the new version **is in beta**, expect crashes every now and then
+> - Known crashes
+>   - When making the terminal really small, it crashes
+> - Issues
+>   - When trying to make submenus the old way, it works, until you exit the submenu, cuz now nothing responds
+>     - BEING WORKED ON
+>   - Sometimes things disappear
+>     - BEING WORKED ON
 
 ---
 
