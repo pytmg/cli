@@ -74,16 +74,13 @@ This initializes a CLI object with the title `My amazing CLI Script`, this will 
 To add a menu item, you're going to need a name and a function.
 
 ```python
+@cli.item(name="Print \"Hello, World!\"")
 def HelloWorld():
     cli.print("Hello, World!") # Use cli.print() rather than print() so that it shows up
-
-cli.addItem("Print \"Hello, World!\"", HelloWorld, ()) # name, function, parameters
 ```
 
-> [!IMPORTANT]
-> Item creation was changed in the most recent update, so update your scripts if necessary.
-> <br>**What changed**:
-> - `addItem` and `addFunction` were merged, so rather than running `cli.addItem(name)` then `cli.addFunction(index, function, params)`, you can run `cli.addItem(name, function, params)`
+> [!NOTE]
+> You can still use `cli.addItem` if you have arguments, but if you don't, it's recommended to use `@cli.item`
 
 What this does is define a new function called `HelloWorld` that prints `"Hello, World!"` when run in the CLI, then creates a new item with the name `Print "Hello, World!"` with that function and no parameters.
 
@@ -157,18 +154,16 @@ from cli import CLI # Import CLI from cli/__init__.py if it's within the subdire
 
 cli = CLI(title="Submenu Test")
 
+@cli.item("Open submenu item")
 def submenu1():
     # Create a new, independent CLI instance for the submenu.
     submenu = CLI(title="Submenu 1")
 
+    @submenu.item("Hello!")
     def goodEvening(): # Function for the item
-        submenu.print("Good evening") # Prints "Good evening"
-
-    submenu.addItem("Hello!", goodEvening, ()) # Add an item with the goodEvening function
+        submenu.print("Howdy!") # Prints "Howdy!"
 
     submenu.run(exitMessage="Go back") # Runs the submenu with a custom exit label
-
-cli.addItem("Open submenu item", submenu1, ())
 
 cli.run() # Run the main menu
 ```
