@@ -1,4 +1,5 @@
-from cli import CLI
+from __init__ import ( CLI ) # THIS ONLY APPLIES FOR THE EXAMPLE
+# USE `from cli import CLI` IF YOU HAVE IT IN A SEPARATE FOLDER
 import time
 
 cli = CLI(title="Enhanced CLI Menu")
@@ -25,20 +26,20 @@ def showTime():
 # 1c. Dynamic Item Addition
 def addNewItem():
     print("Enter a name for the new item:")
-    new_item = input("> ")
+    new_item = input("> ") # Wait for input
     
-    def newItemFunction():
+    def newItemFunction(): # Create a function for the new item
         cli.print(f"You selected: {new_item}")
 
     cli.addItem(new_item, newItemFunction, ())
-    cli.print(f"New item added: {new_item}")
+    cli.print(f"New item added: {new_item}") # Notice
 
 # 1. Add Main Menu Items
 cli.addItem("Say \"Hello, User\"!", sayHello, ())
 cli.addItem("Open a Submenu", openSubmenu, ())
 cli.addItem("Show Current Time", showTime, ())
 cli.addItem("/f red/Add a New Item/reset/", addNewItem, ())
-cli.addItem("Does /e underline//e bold//e italic/NOTHING/reset/", cli.doNothing, ())
+cli.addItem("Does /e underline//e bold//e italic/NOTHING/reset/", cli.doNothing, ()) # NOTHING!!!
 
 # 2d. Exit Confirmation
 def confirmExit(): # No parameters as it will not matter

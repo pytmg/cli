@@ -2,6 +2,20 @@
 
 So, I've created my own CLI Menu script that is actually really easy to use.
 
+## Table of Contents
+- [CLI Documentation](#cli-documentation)
+  - [Table of Contents](#table-of-contents)
+  - [What it is](#what-it-is)
+  - [Installation](#installation)
+    - [Modules](#modules)
+  - [Usage](#usage)
+    - [Initialization](#initialization)
+    - [Adding items](#adding-items)
+    - [Running the script](#running-the-script)
+      - [Creating a custom Exit function and name](#creating-a-custom-exit-function-and-name)
+  - [Advanced Usage](#advanced-usage)
+    - [Submenus](#submenus)
+
 ## What it is
 
 It's essentially just a CLI Menu script, like `GRUB` if you know what that is, which works by pressing either the up or down arrow keys and enter.
@@ -17,7 +31,7 @@ Download the `cli` GitHub Repository
   - and then extract it
   
 > [!NOTE]
-> Use `git clone` as it lets you update easier using `git pull`
+> Use `git clone` in the same directory as your project as it lets you update `cli` easier using `git pull`
 
 Place the `cli` folder in the same directory as your script or in a specific folder you want to organize your dependencies.
 
@@ -35,7 +49,11 @@ from cli import CLI
 
 ### Modules
 
-Modules are handled by `cli.py`, if you don't have them, it will prompt you to install them.
+Modules are handled by `cli/__init__.py`, if you don't have them, it will prompt you to install them.
+
+> **Modules**
+> - keyboard
+> - ansi
 
 That's it!
 
@@ -130,24 +148,25 @@ I know, I know, you really want to know how to use submenus and that is FULLY un
 
 Why would you need sub-menus?
 
-- If there's too much to put in one menu
+- If there's too much to put in one menu. simple as that.
 
 Here's how
 
 ```python
-from cli import CLI # Import CLI from cli.py if it's within the same directory
+from cli import CLI # Import CLI from cli/__init__.py if it's within the subdirectory "cli"
 
 cli = CLI(title="Submenu Test")
 
 def submenu1():
-    submenu = CLI(title="Submenu 1") # Initialize the submenu
+    # Create a new, independent CLI instance for the submenu.
+    submenu = CLI(title="Submenu 1")
 
     def goodEvening(): # Function for the item
         submenu.print("Good evening") # Prints "Good evening"
 
     submenu.addItem("Hello!", goodEvening, ()) # Add an item with the goodEvening function
 
-    submenu.run() # Runs the submenu
+    submenu.run(exitMessage="Go back") # Runs the submenu with a custom exit label
 
 cli.addItem("Open submenu item", submenu1, ())
 
