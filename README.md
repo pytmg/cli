@@ -10,6 +10,7 @@ Really easy to use, you just download the `cli` folder, use `from cli import CLI
 
 **What to expect**:
 - Expect a new version where it uses `curses` rather than `keyboard` + `ansi` modules, for easier use and less obstruction.
+  - I'll aim to keep every function the exact same visually.
   - Obstructions at the moment
     - Needing to install `keyboard` and `ansi`
     - `keyboard` requires root access on UNIX systems
