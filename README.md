@@ -2,34 +2,41 @@
 
 ![Total Commits](https://badgen.net/github/commits/pytmg/cli?color=black&icon=github)
 
-Created for those who want to make a CLI script, but cannot be asked with it.
+Made for folks who want to create a CLI script but can’t be bothered with the hassle.
 
-Really easy to use, you just download the `cli` folder, use `from cli import CLI` and have fun with it!
+It’s **super easy to use**:
+1. Download the `cli` folder.
+2. Add this to your script:
+   ```python
+   from cli import CLI
+   ```
+3. Check out the Docs - [Documentation.md](./Documentation.md)
+4. Have fun building! 🎉
 
 ---
 
 ## About CLI V2-beta
 
-> Usage:
+> **Usage**:
 > ```python
 > from cli.beta import CLI
 > ```
-> Changes are shown in `example.py`.
+> Check out the `example.py` file for changes and usage examples.
 
-It's still in beta, there's no documentation until it's fully done, and the only two things I have left to make are submenu support and coloured options, but is a LOT better than before.
+CLI V2-beta is still in development. While it’s **way better** than before, full documentation isn’t ready yet.
+The two big tasks left:
+1. **Submenu support** – Now working like the old version!
+2. **Colored options** – Still in progress. | May scrap though.
 
 > [!WARNING]
-> Since the new version **is in beta**, expect crashes every now and then
-> - Known crashes
->   - When making the terminal really small, it crashes
-> - Issues
->   - When trying to make submenus the old way, it works, until you exit the submenu, cuz now nothing responds
->     - BEING WORKED ON
->   - Sometimes things disappear
->     - BEING WORKED ON
+> **Beta means bugs!**
+> - **Known Crashes**:
+>   - Resizing the terminal *too small* causes a crash (thanks, `curses`).
+> - **Issues**:
+>   - Sometimes the menu mysteriously disappears (*being worked on*).
 
 ---
 
-Documentation: [Documentation.md](./Documentation.md)
-
-LICENSE: [Ideal License (ILi)](./LICENSE)
+### Additional Resources
+- **Documentation**: [Documentation.md](./Documentation.md)
+- **License**: [Ideal License (ILi)](./LICENSE)

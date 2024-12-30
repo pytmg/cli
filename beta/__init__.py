@@ -9,7 +9,7 @@ def get_input(stdscr: curses.window, prompt=""):
     height, width = stdscr.getmaxyx()
     stdscr.refresh()
 
-    WindowHeight, WindowWidth = 20, 60
+    WindowHeight, WindowWidth = int(height*0.8), int(width*0.8)
 
     print((width//2)-(WindowWidth//2), (height//2)-(WindowHeight//2), (height//2) + (WindowHeight//2), (width//2) + (WindowWidth//2))
 
@@ -214,7 +214,10 @@ class CLI():
             for i, Option in enumerate(self.options):
                 if i == self.selectedIDX:
                     stdscr.attron(curses.color_pair(1))
-                    stdscr.addstr(OptionPosition.y + i, OptionPosition.x, f"> {Option["name"]}")
+                    if len(Option["name"]) > 20:
+                        stdscr.addstr(OptionPosition.y + i, OptionPosition.x, f"> {Option["name"][:20]}...")
+                    else:
+                        stdscr.addstr(OptionPosition.y + i, OptionPosition.x, f"> {Option["name"]}")
                     stdscr.attroff(curses.color_pair(1))
                     stdscr.addstr(DescriptionAreaPosition.y - 1, DescriptionAreaPosition.x, " Description & Keybind " if self.options[self.selectedIDX]["key"] else " Description ")
                     for j, Line in enumerate(self.options[self.selectedIDX]["description"].split("\n")):
@@ -224,7 +227,10 @@ class CLI():
                             stdscr.addstr(DescriptionAreaPosition.y + j, DescriptionAreaPosition.x, f"{Line}")
                     stdscr.addstr(DescriptionAreaPosition.y + len(self.options[self.selectedIDX]["description"].split("\n")) + 1, DescriptionAreaPosition.x, f"Keybind: {self.options[self.selectedIDX]["key"].upper()}") if self.options[self.selectedIDX]["key"] else 0
                 else:
-                    stdscr.addstr(OptionPosition.y + i, OptionPosition.x, f"  {Option["name"]}")
+                    if len(Option["name"]) > 15:
+                        stdscr.addstr(OptionPosition.y + i, OptionPosition.x, f"  {Option["name"][:15]}...")
+                    else:
+                        stdscr.addstr(OptionPosition.y + i, OptionPosition.x, f"  {Option["name"]}")
 
             try:
                 stdscr.refresh()
@@ -241,13 +247,15 @@ class CLI():
                     continue
                 elif key == 10:
                     self.options[self.selectedIDX]["function"](*self.options[self.selectedIDX]["args"])
+                    self.run() if self.running else 0
                     continue
                 else:
                     for option in self.options:
                         try:
                             if key == ord(option["key"]):
                                 option["function"](*option["args"])
-                                stdscr.refresh()
+                                self.run() if self.running else 0
+                                continue
                         except:
                             pass
             except KeyboardInterrupt:

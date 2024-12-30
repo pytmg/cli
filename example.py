@@ -104,6 +104,20 @@ else:
         args=(),
         keybind="c"
     )
+    def openSubmenu():
+        submenu = CLI(title="Submenu")
+
+        submenu.addItem("Submenu Option 1", "Submenu Option 1", submenu.print, ("Yuh."))
+        
+        submenu.run(exitLabel="Go back", exitDescription="Go back to the main menu") # Make the "Exit" message show as Go Back
+
+    cli.addItem(
+        name="Submenu Test 1",
+        description="Opens a submenu",
+        function=openSubmenu,
+        args=(),
+        keybind="s"
+    )
 
     cli.addItem(
         name="Really long description",
