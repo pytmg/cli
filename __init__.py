@@ -157,7 +157,7 @@ class CLI:
         self.refresh()
 
         while self.running:
-            event = keyboard.read_event(suppress=False)
+            event = keyboard.read_event(suppress=True)
             if event.event_type == keyboard.KEY_DOWN:
                 if event.scan_code == 80:
                     self.selected_index += 1

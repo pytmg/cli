@@ -5,7 +5,7 @@ if not UseBeta:
     # USE `from cli import CLI` IF YOU HAVE IT IN A SEPARATE FOLDER
     import time
 
-    cli = CLI(title="Enhanced CLI Menu")
+    cli = CLI(title="Enhanced CLI Menu | CLI-V1")
 
     # 1. Function creation
     @cli.item(name="Say \"Hello, User\"!")
