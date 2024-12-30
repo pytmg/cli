@@ -68,18 +68,21 @@ def get_input(stdscr: curses.window, prompt=""):
 
 class CLI():
     def __init__(self, title: str = "No title provided"):
-        self.title = title
+        self.title = str(title) if type(title) != str else title
         self.selectedIDX = 0
         self.printStatement = ""
         self.running = False
         self.exitAdded = False
         self.options = []
         self.stdscr = None
+        self.ColumnLength = 0
+        self.dimensions = 0,0
 
     def exit(self):
         self.running = False
 
     def print(self, *args):
+        args = [str(arg) for arg in args]
         self.printStatement = "".join(args)
 
     def input(self, *args):
@@ -120,6 +123,9 @@ class CLI():
                         "key": keybind.lower() if keybind else None
                     })
             self.options.append(EXIT)
+
+    def doNothing(self, *args):
+        pass
 
     def main(self, stdscr: curses.window):
         curses.start_color()
@@ -170,6 +176,9 @@ class CLI():
             X1 = (width//2) - (len(TITLE)//2)
             X2 = ((width//2) + (len(TITLE)//2)) - (1 if len(TITLE)%2 == 0 else 0)
 
+            self.ColumnLength = height - 16
+            self.dimensions = height, width
+
             stdscr.addstr(0, X1, "╦")
             stdscr.addstr(0, X2, "╦")
 
@@ -212,12 +221,14 @@ class CLI():
             OptionPosition.y += 2
 
             for i, Option in enumerate(self.options):
+                Y_POS = i % self.ColumnLength
+                X_MULT = (i // self.ColumnLength) * 25
                 if i == self.selectedIDX:
                     stdscr.attron(curses.color_pair(1))
                     if len(Option["name"]) > 20:
-                        stdscr.addstr(OptionPosition.y + i, OptionPosition.x, f"> {Option["name"][:20]}...")
+                        stdscr.addstr(OptionPosition.y + Y_POS, OptionPosition.x + X_MULT, f"> {Option["name"][:20]}...")
                     else:
-                        stdscr.addstr(OptionPosition.y + i, OptionPosition.x, f"> {Option["name"]}")
+                        stdscr.addstr(OptionPosition.y + Y_POS, OptionPosition.x + X_MULT, f"> {Option["name"]}")
                     stdscr.attroff(curses.color_pair(1))
                     stdscr.addstr(DescriptionAreaPosition.y - 1, DescriptionAreaPosition.x, " Description & Keybind " if self.options[self.selectedIDX]["key"] else " Description ")
                     for j, Line in enumerate(self.options[self.selectedIDX]["description"].split("\n")):
@@ -228,9 +239,9 @@ class CLI():
                     stdscr.addstr(DescriptionAreaPosition.y + len(self.options[self.selectedIDX]["description"].split("\n")) + 1, DescriptionAreaPosition.x, f"Keybind: {self.options[self.selectedIDX]["key"].upper()}") if self.options[self.selectedIDX]["key"] else 0
                 else:
                     if len(Option["name"]) > 15:
-                        stdscr.addstr(OptionPosition.y + i, OptionPosition.x, f"  {Option["name"][:15]}...")
+                        stdscr.addstr(OptionPosition.y + Y_POS, OptionPosition.x + X_MULT, f"  {Option["name"][:15]}...")
                     else:
-                        stdscr.addstr(OptionPosition.y + i, OptionPosition.x, f"  {Option["name"]}")
+                        stdscr.addstr(OptionPosition.y + Y_POS, OptionPosition.x + X_MULT, f"  {Option["name"]}")
 
             try:
                 stdscr.refresh()
@@ -244,6 +255,16 @@ class CLI():
                 elif key == curses.KEY_DOWN:
                     self.selectedIDX += 1
                     self.selectedIDX %= len(self.options)
+                    continue
+                elif key == curses.KEY_RIGHT:
+                    self.selectedIDX += self.ColumnLength
+                    if self.selectedIDX > len(self.options):
+                        self.selectedIDX = len(self.options)-1
+                    continue
+                elif key == curses.KEY_LEFT:
+                    self.selectedIDX -= self.ColumnLength
+                    if self.selectedIDX < 0:
+                        self.selectedIDX = 0
                     continue
                 elif key == 10:
                     self.options[self.selectedIDX]["function"](*self.options[self.selectedIDX]["args"])

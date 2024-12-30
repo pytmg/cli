@@ -57,6 +57,9 @@ Modules are handled by `cli/__init__.py`, if you don't have them, it will prompt
 
 That's it!
 
+> [!NOTE]
+> If you're on Windows 10, there's a good chance that ANSI won't render properly, so you need to run this command in your terminal: `REG ADD HKCU\Console /f /v VirtualTerminalLevel /t REG_DWORD /d 1`
+
 ## Usage
 
 ### Initialization
