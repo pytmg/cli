@@ -25,19 +25,21 @@ It’s **super easy to use**:
 
 CLI V2-beta is still in development.
 <small>*(But nearly done!!!)*</small>
- While it’s **way better** than before, full documentation isn’t ready yet.
+
+While it’s **way better** than before, documentation still isn't done yet <small>*([V2-beta Documentation](./beta/Documentation.md))*</small>.
+
 The one big task left:
 1. **Colored options** – Still in progress.
-   - I may scrap this due to the fact that `curses` *is* kinda difficult to get some things working with, but, I'll try my best to get it working.
+   - Might give up, given `curses` is a pain in the arse but I'll try to get it working.
 
 > [!WARNING]
 > **Beta means bugs!**
 > - **Known Crashes**:
 >   - ~~Resizing the terminal *too small* causes a crash (thanks, `curses`).~~
->   - Now it tells you if the terminal is too small, and will continue when the terminal is big enough... sometimes.
+>   - Now it tells you if the terminal is too small, and will continue when the terminal is big enough... *maybe* (depends on how `curses` is feeling like treating you).
 > - **Issues**:
->   - ~~Sometimes the menu mysteriously disappears~~ (*probably fixed*).
->   - I haven't been able to replicate this, probably after making a workaround for the resizing, but, IDK. Let me know if you manage to do it.
+>   - ~~Sometimes the menu mysteriously disappears~~ (*probably fixed??*).
+>   - Haven’t been able to replicate it lately, but let me know if you can. It might’ve been patched after the resizing workaround.
 
 ---
 
