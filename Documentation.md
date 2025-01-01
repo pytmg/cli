@@ -1,9 +1,9 @@
-# CLI Documentation
+# CLI-V1 Documentation
 
 So, I've created my own CLI Menu script that is actually really easy to use.
 
 ## Table of Contents
-- [CLI Documentation](#cli-documentation)
+- [CLI-V1 Documentation](#cli-v1-documentation)
   - [Table of Contents](#table-of-contents)
   - [What it is](#what-it-is)
   - [Installation](#installation)
@@ -45,7 +45,7 @@ Use this if you have it under a directory called `Dependencies`, otherwise, use 
 from cli import CLI
 ```
 
-`cli` is the main file, and the `CLI` class is actually required for the script.
+`cli` is the main folder, and the `CLI` class is actually required for the script.
 
 ### Modules
 
@@ -106,7 +106,7 @@ def exitFunction(): # No parameters!!
   if input("Are you sure? (Y/n)\n> ").lower().startswith("y"):
     cli.exit()
 
-cli.run(exitFunction=exitFunction)
+cli.run(exitFunction=exitFunction, exitName="Exit Confirmation")
 ```
 
 > [!TIP]

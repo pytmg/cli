@@ -23,20 +23,26 @@ It’s **super easy to use**:
 > ```
 > Check out the `example.py` file for changes and usage examples.
 
-CLI V2-beta is still in development. While it’s **way better** than before, full documentation isn’t ready yet.
-The two big tasks left:
-1. **Submenu support** – Now working like the old version!
-2. **Colored options** – Still in progress. | May scrap though.
+CLI V2-beta is still in development.
+<small>*(But nearly done!!!)*</small>
+ While it’s **way better** than before, full documentation isn’t ready yet.
+The one big task left:
+1. **Colored options** – Still in progress.
+   - I may scrap this due to the fact that `curses` *is* kinda difficult to get some things working with, but, I'll try my best to get it working.
 
 > [!WARNING]
 > **Beta means bugs!**
 > - **Known Crashes**:
->   - Resizing the terminal *too small* causes a crash (thanks, `curses`).
+>   - ~~Resizing the terminal *too small* causes a crash (thanks, `curses`).~~
+>   - Now it tells you if the terminal is too small, and will continue when the terminal is big enough.
 > - **Issues**:
->   - Sometimes the menu mysteriously disappears (*being worked on*).
+>   - ~~Sometimes the menu mysteriously disappears~~ (*probably fixed*).
+>   - I haven't been able to replicate this, probably after making a workaround for the resizing, but, IDK. Let me know if you manage to do it.
 
 ---
 
 ### Additional Resources
-- **Documentation**: [Documentation.md](./Documentation.md)
+- **Documentation**
+  - [V1 Documentation](./Documentation.md)
+  - [V2-beta Documentation](./beta/Documentation.md)
 - **License**: [Ideal License (ILi)](./LICENSE)
