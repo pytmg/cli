@@ -34,7 +34,7 @@ The one big task left:
 > **Beta means bugs!**
 > - **Known Crashes**:
 >   - ~~Resizing the terminal *too small* causes a crash (thanks, `curses`).~~
->   - Now it tells you if the terminal is too small, and will continue when the terminal is big enough.
+>   - Now it tells you if the terminal is too small, and will continue when the terminal is big enough... sometimes.
 > - **Issues**:
 >   - ~~Sometimes the menu mysteriously disappears~~ (*probably fixed*).
 >   - I haven't been able to replicate this, probably after making a workaround for the resizing, but, IDK. Let me know if you manage to do it.
