@@ -82,7 +82,7 @@ class Option:
             self.args = args
             self.keybind = keybind
 
-        def INTERACTION(self):
+        def INTERACTION(self, *, stdscr: curses.window):
             self.function(*self.args)
             
     class Boolean(Base):
@@ -323,20 +323,14 @@ class CLI():
                             self.selectedIDX = 0
                         continue
                     elif key == 10:
-                        if not isinstance(self.options[self.selectedIDX], Option.Default):
-                            self.options[self.selectedIDX].INTERACTION(stdscr=self.stdscr)
-                        else:
-                            self.options[self.selectedIDX].function(*self.options[self.selectedIDX].args)
+                        self.options[self.selectedIDX].INTERACTION(stdscr=self.stdscr)
                         self.run() if self.running else 0
                         continue
                     else:
                         for option in self.options:
                             try:
                                 if key == ord(option.keybind):
-                                    if not isinstance(option, Option.Default):
-                                        option.INTERACTION(stdscr=self.stdscr)
-                                    else:
-                                        option.function(*option.args)
+                                    option.INTERACTION(stdscr=self.stdscr)
                                     self.run() if self.running else 0
                                     continue
                             except:
