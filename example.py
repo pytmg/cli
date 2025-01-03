@@ -1,4 +1,4 @@
-UseBeta = True
+UseBeta = True # Set this to False if you'd like to try the.. older version.
 
 if not UseBeta:
     from __init__ import ( CLI ) # THIS ONLY APPLIES FOR THE EXAMPLE
@@ -63,7 +63,7 @@ else:
     THIS IS NOT DONE SO IT HAS SOME FEATURES NOT ADDED YET - such as coloured options and submenus
     """
     
-    from beta import ( CLI, Option )
+    from beta import ( CLI, Option ) # cli.beta
 
     cli = CLI(title="pytmg CLI | V2-beta")
 

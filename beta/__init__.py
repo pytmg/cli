@@ -1,7 +1,14 @@
+"""CLI Manager for Python
+
+Authors:
+    pytmg: https://github.com/pytmg"""
+
 import curses
 
 class Vector2():
+    """A 2D Vector"""
     def __init__(self, x: int = 0, y: int = 0):
+        """Create a new Vector2"""
         self.x = x
         self.y = y
 
@@ -71,10 +78,22 @@ def get_input(stdscr: curses.window, prompt:str="", numOnly: bool = False):
     return input_str if not numOnly else int(input_str)
 
 class Option:
+    """Options for the CLI"""
     class Base():
-        pass
+        """Base class for options. - Only use this for type hints."""
+        def __init__(self):
+            self.name = ""
+            self.description = ""
+            self.keybind = None
+            self.args = ()
+            self.function = CLI.doNothing
+            self.value = None
+
+        def INTERACTION(self, *, stdscr: curses.window):
+            pass
 
     class Default(Base):
+        """Runs a function when selected"""
         def __init__(self, name, description, function, args = (), keybind = None):
             self.name = name
             self.description = description
@@ -86,6 +105,7 @@ class Option:
             self.function(*self.args)
             
     class Boolean(Base):
+        """Boolean (On/Off)"""
         def __init__(self, name, description, default = False, keybind = None):
             self.name = name
             self.description = description
@@ -98,9 +118,11 @@ class Option:
 
     class Input(Base):
         class Base():
+            """Base class for input options."""
             pass
 
         class String(Base):
+            """String input"""
             def __init__(self, name, description, default = "", keybind = None):
                 self.name = name
                 self.description = description
@@ -112,6 +134,7 @@ class Option:
                 self.value = get_input(stdscr=stdscr, prompt=self.name)
 
         class Number(Base):
+            """Number input"""
             def __init__(self, name, description, default = 0, keybind = None):
                 self.name = name
                 self.description = description
@@ -123,7 +146,28 @@ class Option:
                 self.value = get_input(stdscr=stdscr, prompt=self.name, numOnly=True)
 
 class CLI():
+    """The CLI
+    
+    Usage:
+    ```python
+    from cli.beta import CLI, Option
+
+    cli = CLI("YourTitleHere")
+    idx = cli.addItem(
+        Option.Default(
+            name="Hello World",
+            description="Prints 'Hello, World!'",
+            function=cli.print,
+            args=("Hello, World!",)
+        )
+    )
+    cli.run()
+    """
     def __init__(self, title: str = "No title provided"):
+        """Create a new CLI
+        
+        Params:
+            title: str - The title of the CLI"""
         self.title = str(title) if type(title) != str else title
         self.selectedIDX = 0
         self.printStatement = ""
@@ -135,16 +179,38 @@ class CLI():
         self.dimensions = 0,0
 
     def exit(self):
+        """Exit the CLI"""
         self.running = False
 
-    def print(self, *args):
+    def print(self, *args) -> None:
+        """Print a statement to the output area
+        
+        Params:
+            *args: str - The statement to print
+            
+        Returns:
+            None"""
         args = [str(arg) for arg in args]
         self.printStatement = "".join(args)
 
-    def input(self, *args):
+    def input(self, *args) -> str:
+        """Get input from the user
+
+        Params:
+            *args: str - The prompt to display to the user
+            
+        Returns:
+            str - The input from the user"""
         return get_input(stdscr=self.stdscr, prompt=" ".join(args))
 
-    def run(self, exitLabel = "Exit", exitDescription = "Exits the program.", exitFunction = None, exitArguments = ()):
+    def run(self, exitLabel = "Exit", exitDescription = "Exits the program.", exitFunction = None, exitArguments = ()) -> None:
+        """Run the CLI
+
+        Params:
+            exitLabel: str - The name of the exit option
+            exitDescription: str - The description of the exit option
+            exitFunction: function - The function to run when the exit option is selected
+            exitArguments: tuple - The arguments to pass to the exit function"""
         self.addItem(Option.Default(
             name=exitLabel,
             description=exitDescription,
@@ -155,20 +221,67 @@ class CLI():
         self.exitAdded = True
         curses.wrapper(self.main)
 
-    def addItem(self, option: Option.Base):
+    def addItem(self, option: Option.Base) -> int:
+        """Add an option to the menu
+
+        Params:
+            option: Option.Base - Any type of option to add to the menu
+            
+        Returns:
+            int - The index of the option in the options list"""
+        number = False
+        temp = option.name
+        
+        while True:
+            if any(opt.name == temp for opt in self.options):
+                number = 2 if not number else number + 1
+                temp = f"{option.name} ({number})"
+            else:
+                option.name = temp
+                break
+
         if option.keybind:
             for option2 in self.options:
                 if option.keybind == option2.keybind:
                     option.keybind = None
+                    break
+
         if not self.exitAdded:
+            idx = len(self.options)
             self.options.append(option)
         else:
-            EXIT = self.options[-1]
-            self.options.pop(-1)
+            exit_option = self.options.pop()
+            idx = len(self.options)
             self.options.append(option)
-            self.options.append(EXIT)
+            self.options.append(exit_option)
+        
+        return idx
+
+    def getValueByIndex(self, index):
+        """Get the value of an option at a specific index
+
+        Params:
+            index: int - The index of the option to get the value of
+        """
+        if isinstance(self.options[index], Option.Default):
+            raise AttributeError("Type 'Option.Default' has no attribute 'value'")
+        return self.options[index].value
+
+    def getValueByName(self, name):
+        """Get the value of an option by its name
+
+        Params:
+            name: str - The name of the option to get the value of
+        """
+        for option in self.options:
+            if option.name == name:
+                if isinstance(option, Option.Default):
+                    raise AttributeError("Type 'Option.Default' has no attribute 'value'")
+                return option.value
+        raise ValueError(f"No option found with the name '{name}'")
 
     def doNothing(self, *args):
+        """Frankly, does absolutely nothing."""
         pass
 
     def main(self, stdscr: curses.window):
@@ -264,40 +377,41 @@ class CLI():
                 stdscr.addstr(OptionPosition.y, (width//2) - (len(TITLE)//2), TITLE)
                 OptionPosition.y += 2
 
+                def render_option(option, Y_POS, X_MULT, max_len=20, isActive = False):
+                    display_name = option.name if len(option.name) <= max_len else option.name[:max_len] + "..."
+                    if isinstance(option, Option.Boolean):
+                        display_value = f" {'[x]' if option.value else '[ ]'}"
+                    else:
+                        display_value = ""
+                    if isActive:
+                        Status = ">"
+                    else:
+                        Status = " "
+                    return f"{Status} {display_name}{display_value}"
+
+                def render_description(stdscr, option, width):
+                    description_lines = option.description.split("\n")
+                    for j, line in enumerate(description_lines):
+                        if len(line) > (width//2)-3:
+                            stdscr.addstr(DescriptionAreaPosition.y + j, DescriptionAreaPosition.x, f"{line[:(width//2)-6]}...")
+                        else:
+                            stdscr.addstr(DescriptionAreaPosition.y + j, DescriptionAreaPosition.x, f"{line}")
+                    if option.keybind:
+                        stdscr.addstr(DescriptionAreaPosition.y + len(description_lines) + 1, DescriptionAreaPosition.x, f"Keybind: {option.keybind.upper()}")
+
                 for i, option in enumerate(self.options):
                     Y_POS = i % self.ColumnLength
                     X_MULT = (i // self.ColumnLength) * 25
-                    if i == self.selectedIDX:
-                        stdscr.attron(curses.color_pair(1))
-                        if not isinstance(option, Option.Boolean):
-                            if len(option.name) > 20:
-                                stdscr.addstr(OptionPosition.y + Y_POS, OptionPosition.x + X_MULT, f"> {option.name[:20]}...")
-                            else:
-                                stdscr.addstr(OptionPosition.y + Y_POS, OptionPosition.x + X_MULT, f"> {option.name}")
-                        else:
-                            if len(option.name) > 16:
-                                stdscr.addstr(OptionPosition.y + Y_POS, OptionPosition.x + X_MULT, f"> {option.name[:17]}... {'[x]' if option.value else '[ ]'}")
-                            else:
-                                stdscr.addstr(OptionPosition.y + Y_POS, OptionPosition.x + X_MULT, f"> {option.name} {'[x]' if option.value else '[ ]'}")
-                        stdscr.attroff(curses.color_pair(1))
-                        stdscr.addstr(DescriptionAreaPosition.y - 1, DescriptionAreaPosition.x, " Description & Keybind " if self.options[self.selectedIDX].keybind else " Description ")
-                        for j, Line in enumerate(self.options[self.selectedIDX].description.split("\n")):
-                            if len(Line) > (width//2)-3:
-                                stdscr.addstr(DescriptionAreaPosition.y + j, DescriptionAreaPosition.x, f"{Line[:(width//2)-6]}...")
-                            else:
-                                stdscr.addstr(DescriptionAreaPosition.y + j, DescriptionAreaPosition.x, f"{Line}")
-                        stdscr.addstr(DescriptionAreaPosition.y + len(self.options[self.selectedIDX].description.split("\n")) + 1, DescriptionAreaPosition.x, f"Keybind: {self.options[self.selectedIDX].keybind.upper()}") if self.options[self.selectedIDX].keybind else 0
-                    else:
-                        if not isinstance(option, Option.Boolean):
-                            if len(option.name) > 15:
-                                stdscr.addstr(OptionPosition.y + Y_POS, OptionPosition.x + X_MULT, f"  {option.name[:15]}...")
-                            else:
-                                stdscr.addstr(OptionPosition.y + Y_POS, OptionPosition.x + X_MULT, f"  {option.name}")
-                        else:
-                            if len(option.name) > 11:
-                                stdscr.addstr(OptionPosition.y + Y_POS, OptionPosition.x + X_MULT, f"  {option.name[:11]}... {'[x]' if option.value else '[ ]'}")
-                            else:
-                                stdscr.addstr(OptionPosition.y + Y_POS, OptionPosition.x + X_MULT, f"  {option.name} {'[x]' if option.value else '[ ]'}")
+
+                    # Call render_option to render the option text
+                    isActive = i == self.selectedIDX
+                    stdscr.attron(curses.color_pair(1)) if isActive else 0
+                    stdscr.addstr(OptionPosition.y + Y_POS, OptionPosition.x + X_MULT, render_option(option, Y_POS, X_MULT, isActive=isActive))
+                    stdscr.attroff(curses.color_pair(1)) if isActive else 0
+
+                    if isActive:
+                        stdscr.addstr(DescriptionAreaPosition.y - 1, DescriptionAreaPosition.x, " Description & Keybind " if option.keybind else " Description ")
+                        render_description(stdscr, option, width)
 
                 try:
                     stdscr.refresh()
@@ -337,7 +451,9 @@ class CLI():
                                 pass
                 except KeyboardInterrupt:
                     pass
-            except curses.error:
+            except curses.error as e:
+                if not str(e).startswith("addwstr()"):
+                    break
                 try:
                     stdscr.clear()
                     pos = Vector2(width//2, height//2)

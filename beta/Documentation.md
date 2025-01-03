@@ -1,6 +1,6 @@
 # CLI-V2-beta Documentation
 
-CLI-V2-beta is a version of CLI that is not fully completed yet, but here is the current Documentation for it as of 1 January, and yes, that means it's very likely to change in future.
+CLI-V2-beta is a version of CLI that is not fully completed yet, but here is the current Documentation for it as of 3/Jan/25, and yes, that means it's very likely to change in future.
 
 ## Table of Contents
 - [CLI-V2-beta Documentation](#cli-v2-beta-documentation)
@@ -11,10 +11,12 @@ CLI-V2-beta is a version of CLI that is not fully completed yet, but here is the
   - [Usage](#usage)
     - [Initialization](#initialization)
     - [Adding items](#adding-items)
-      - [Option.Default](#optiondefault)
-      - [Option.Boolean](#optionboolean)
-      - [Option.Input](#optioninput)
-        - [Number](#number)
+      - [Option Types](#option-types)
+        - [Option.Default](#optiondefault)
+        - [Option.Boolean](#optionboolean)
+        - [Option.Input](#optioninput)
+          - [Number](#number)
+          - [String](#string)
     - [Running the script](#running-the-script)
       - [Creating a custom Exit function and name](#creating-a-custom-exit-function-and-name)
 
@@ -51,7 +53,10 @@ from cli.beta import CLI, Option
 
 ### Modules
 
-There are no modules *required*, but at the moment, trying to import `cli.beta` will offer some modules to install from PyPI, but this will be removed once V2 is done.
+There are no modules *required*, but at the moment, but for some ungodly reason, importing `cli.beta` inflicts the MAIN `cli` file, which kinda forces you to install the required modules for V1. It's stupid, but you can install them and get it over with.
+
+> [!NOTE]
+> Once V2 is fully done, V1 will be put in a seperate folder, so that it doesn't force unnecessary module installation.
 
 > **Modules**
 > - keyboard
@@ -93,7 +98,9 @@ There are different types of items for CLI.
   - String
     - String input - Just that.
 
-#### Option.Default
+#### Option Types
+
+##### Option.Default
 
 All you need is a function, really.
 
@@ -110,7 +117,7 @@ cli.addItem(NewOption)
 
 Example output: `2024-12-31 14:30:45`
 
-#### Option.Boolean
+##### Option.Boolean
 
 Really simple!
 
@@ -121,24 +128,29 @@ NewBoolOption = Option.Boolean(
     default=False
 )
 
-cli.addItem(NewBoolOption)
+NewBoolOptionIDX = cli.addItem(NewBoolOption)
+
+cli.getValueByIndex(NewBoolOptionIDX) # Returns the value of NewBoolOption when called
 ```
+
+You can also call `getValueByName` instead if you want to get it by name.
 
 Example:
 
+False
 ```
 Boolean! [ ]
 ```
-or
+or True
 ```
 Boolean! [x]
 ```
 
-#### Option.Input
+##### Option.Input
 
 Both of these open an input window.
 
-##### Number
+###### Number
 
 ```python
 NewNumberOption = Option.Input.Number(
@@ -150,17 +162,11 @@ NewNumberOption = Option.Input.Number(
 cli.addItem(NewNumberOption)
 ```
 
-Currently, no way to read the current value, but it IS being worked on!
+You can read the value with either `cli.getValueByName` or `cli.getValueByIndex`.
 
-- There are workarounds, however.
-- ```python
-  numOptIDX = len(cli.options) - 1 # Get the index of the new option before running cli.run()
+`cli.addItem` does also return the index of the item when added!
 
-  cli.addItem(NewNumberOption)
-  ```
-- Then read it with `cli.options[numOptIDX].value`
-
-##### String
+###### String
 
 ```python
 NewStringOption = Option.Input.String(
@@ -172,7 +178,7 @@ NewStringOption = Option.Input.String(
 cli.addItem(NewStringOption)
 ```
 
-Same with [Number](#number), you can't read the current value without a workaround.
+Same as [Number](#number), you can read the value with `cli.getValueByName` or `cli.getValueByIndex`.
 
 ### Running the script
 

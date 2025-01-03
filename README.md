@@ -19,18 +19,17 @@ It’s **super easy to use**:
 
 > **Usage**:
 > ```python
-> from cli.beta import CLI
+> from cli.beta import CLI, Option
 > ```
 > Check out the `example.py` file for changes and usage examples.
 
 CLI V2-beta is still in development.
 <small>*(But nearly done!!!)*</small>
 
-While it’s **way better** than before, documentation still isn't done yet <small>*([V2-beta Documentation](./beta/Documentation.md))*</small>.
+While it’s **way better** than before, there are still some bugs I need to polish out.
 
-The one big task left:
-1. **Colored options** – Still in progress.
-   - Might give up, given `curses` is a pain in the arse but I'll try to get it working.
+1. **Colored options** – not gonna do it.
+   - ~~Might give up, given `curses` is a pain in the arse but I'll try to get it working.~~ i can't be asked lol
 
 > [!WARNING]
 > **Beta means bugs!**
@@ -40,6 +39,12 @@ The one big task left:
 > - **Issues**:
 >   - ~~Sometimes the menu mysteriously disappears~~ (*probably fixed??*).
 >   - Haven’t been able to replicate it lately, but let me know if you can. It might’ve been patched after the resizing workaround.
+
+---
+
+## UNIX Usage
+
+There are *some* issues with Linux and this CLI menu shenanagin, BUT, you can [fork](https://github.com/pytmg/cli/fork) this repository, and make a fix for UNIX Systems!
 
 ---
 

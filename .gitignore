@@ -3,6 +3,7 @@
 
 # With exceptions
 !/__init__.py
+# beta version 😱😱
 !/beta
 !/Documentation.md
 !/example.py
