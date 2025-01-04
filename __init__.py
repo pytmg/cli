@@ -1,6 +1,9 @@
 """
 A CLI Menu system module created by TMG.
 
+- Authors:
+    - [pytmg](https://github.com/pytmg)
+
 - Example Usage:
 
     ```python

@@ -1,7 +1,22 @@
-"""CLI Manager for Python
+"""CLI-V2-beta
 
-Authors:
-    pytmg: https://github.com/pytmg"""
+- Authors:
+    - [pytmg](https://github.com/pytmg)
+
+- Example Usage:
+
+    ```python
+    from cli.beta import CLI, Option
+
+    cli = CLI()
+
+    def goodMorning():
+        cli.print("Good Morning!")
+
+    cli.addItem(Option.Default("Good morning!", "Say \\"Good Morning\\"", goodMorning, ()))
+
+    cli.run()
+    ```"""
 
 import curses
 
