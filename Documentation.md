@@ -22,8 +22,6 @@ Ever wanted CLI Menus to be easier to create? Worry no more with CLI-V2!
     - [Customisability](#customisability)
       - [Config](#config)
       - [Border](#border)
-- [Assuming there's still only Double and Single](#assuming-theres-still-only-double-and-single)
-- [And again, you can also run `cli.border = border` if you don't add it on initialisation.](#and-again-you-can-also-run-cliborder--border-if-you-dont-add-it-on-initialisation)
 
 ## What it is
 
@@ -255,3 +253,4 @@ cli = CLI(borders=border)
 # And again, you can also run `cli.border = border` if you don't add it on initialisation.
 
 cli.run()
+```
