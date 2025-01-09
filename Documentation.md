@@ -19,6 +19,11 @@ Ever wanted CLI Menus to be easier to create? Worry no more with CLI-V2!
           - [String](#string)
     - [Running the script](#running-the-script)
       - [Creating a custom Exit function and name](#creating-a-custom-exit-function-and-name)
+    - [Customisability](#customisability)
+      - [Config](#config)
+      - [Border](#border)
+- [Assuming there's still only Double and Single](#assuming-theres-still-only-double-and-single)
+- [And again, you can also run `cli.border = border` if you don't add it on initialisation.](#and-again-you-can-also-run-cliborder--border-if-you-dont-add-it-on-initialisation)
 
 ## What it is
 
@@ -199,3 +204,54 @@ cli.run(exitFunction=exitFunction, exitLabel="Exit Confirmation")
 ---
 
 This runs the cli object with all the functions and items you have created.
+
+### Customisability
+
+You can add more customisability with the `Config` and `Border` classes.
+
+#### Config
+
+This lets you toggle on or off, to your liking, the following:
+- Output Area
+- Description Area
+- Title
+- AutoResizing (Recommended to keep ON)
+
+Example Usage
+
+```python
+from cli import CLI, Option, Config
+
+cfg = Config(ShowTitle=False) # Disables the title at the top
+
+cli = CLI(title="None", config=cfg)
+
+# You can also run `cli.config = cfg` if you don't add it on initialisation
+
+cli.run() # Just adds the Exit option :)
+```
+
+And you'll notice it doesn't say `None` anywhere.
+
+Output and Descriptions can be toggled off, this also removes the boxes, so if you have a lot of options and don't care about the descriptions nor outputs, you can turn these off.
+
+#### Border
+
+Borders are defined within the `Border` class in `__init__.py`, you can add more if you want, by going into the code.
+- Lines `114` to `124` in `__init__.py` are the lines you'll have to add to.
+- Along with `109` just to add the name.
+
+Example Usage
+
+```python
+# Assuming there's still only Double and Single
+
+from cli import CLI, Option, Border
+
+border = Border("Single")
+
+cli = CLI(borders=border)
+
+# And again, you can also run `cli.border = border` if you don't add it on initialisation.
+
+cli.run()
