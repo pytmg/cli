@@ -1,9 +1,9 @@
-# CLI-V1 Documentation
+# CLI-V2 Documentation
 
-So, I've created my own CLI Menu script that is actually really easy to use.
+Ever wanted CLI Menus to be easier to create? Worry no more with CLI-V2!
 
 ## Table of Contents
-- [CLI-V1 Documentation](#cli-v1-documentation)
+- [CLI-V2 Documentation](#cli-v2-documentation)
   - [Table of Contents](#table-of-contents)
   - [What it is](#what-it-is)
   - [Installation](#installation)
@@ -11,10 +11,14 @@ So, I've created my own CLI Menu script that is actually really easy to use.
   - [Usage](#usage)
     - [Initialization](#initialization)
     - [Adding items](#adding-items)
+      - [Option Types](#option-types)
+        - [Option.Default](#optiondefault)
+        - [Option.Boolean](#optionboolean)
+        - [Option.Input](#optioninput)
+          - [Number](#number)
+          - [String](#string)
     - [Running the script](#running-the-script)
       - [Creating a custom Exit function and name](#creating-a-custom-exit-function-and-name)
-  - [Advanced Usage](#advanced-usage)
-    - [Submenus](#submenus)
 
 ## What it is
 
@@ -36,29 +40,28 @@ Download the `cli` GitHub Repository
 Place the `cli` folder in the same directory as your script or in a specific folder you want to organize your dependencies.
 
 ```python
-from Dependencies.cli import CLI
+from Dependencies.cli import CLI, Option
 ```
 
 Use this if you have it under a directory called `Dependencies`, otherwise, use this
 
 ```python
-from cli import CLI
+from cli import CLI, Option
 ```
 
-`cli` is the main folder, and the `CLI` class is actually required for the script.
+`cli` is the main folder, and the `CLI` and `Option` classes are actually required for the script.
 
 ### Modules
 
-Modules are handled by `cli/__init__.py`, if you don't have them, it will prompt you to install them.
+There are no modules required, but, you can also install `windows-curses` if you're on Windows and don't have `curses`.
 
-> **Modules**
-> - keyboard
-> - ansi
+> - windows-curses
+>   - for.. compatibility.
 
 That's it!
 
 > [!NOTE]
-> If you're on Windows 10, there's a good chance that ANSI won't render properly, so you need to run this command in your terminal: `REG ADD HKCU\Console /f /v VirtualTerminalLevel /t REG_DWORD /d 1`
+> If you're on Windows 10, there's a decent chance that ANSI won't render properly, so you need to run this command in your terminal: `REG ADD HKCU\Console /f /v VirtualTerminalLevel /t REG_DWORD /d 1`
 
 ## Usage
 
@@ -74,22 +77,103 @@ This initializes a CLI object with the title `My amazing CLI Script`, this will 
 
 ### Adding items
 
-To add a menu item, you're going to need a name and a function.
+There are different types of items for CLI.
+
+- Default
+  - The default CLI Option, you need to define and use a function for this one.
+- Boolean
+  - Just an on-off switch
+- Input
+  - Number
+    - Integer input - You can use the numpad OR number row on your keyboard.
+  - String
+    - String input - Just that.
+
+#### Option Types
+
+##### Option.Default
+
+All you need is a function, really.
 
 ```python
-@cli.item(name="Print \"Hello, World!\"")
-def HelloWorld():
-    cli.print("Hello, World!") # Use cli.print() rather than print() so that it shows up
+NewOption = Option.Default(
+    name="Custom Option",
+    description="Shows the time!",
+    cli.print, # Default print function in CLI()
+    (time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())) # import time btw
+)
+
+cli.addItem(NewOption)
 ```
 
-> [!NOTE]
-> You can still use `cli.addItem` if you have arguments, but if you don't, it's recommended to use `@cli.item`
+Example output: `2024-12-31 14:30:45`
 
-What this does is define a new function called `HelloWorld` that prints `"Hello, World!"` when run in the CLI, then creates a new item with the name `Print "Hello, World!"` with that function and no parameters.
+##### Option.Boolean
+
+Really simple!
+
+```python
+NewBoolOption = Option.Boolean(
+    name="Boolean!",
+    description="On/Off",
+    default=False
+)
+
+NewBoolOptionIDX = cli.addItem(NewBoolOption)
+
+cli.getValueByIndex(NewBoolOptionIDX) # Returns the value of NewBoolOption when called
+```
+
+You can also call `getValueByName` instead if you want to get it by name.
+
+Example:
+
+False
+```
+Boolean! [ ]
+```
+or True
+```
+Boolean! [x]
+```
+
+##### Option.Input
+
+Both of these open an input window.
+
+###### Number
+
+```python
+NewNumberOption = Option.Input.Number(
+    name="Number",
+    description="Input a number!",
+    default=0
+)
+
+cli.addItem(NewNumberOption)
+```
+
+You can read the value with either `cli.getValueByName` or `cli.getValueByIndex`.
+
+`cli.addItem` does also return the index of the item when added!
+
+###### String
+
+```python
+NewStringOption = Option.Input.String(
+    name="String",
+    description="Input a string!",
+    default=""
+)
+
+cli.addItem(NewStringOption)
+```
+
+Same as [Number](#number), you can read the value with `cli.getValueByName` or `cli.getValueByIndex`.
 
 ### Running the script
 
-To be able to run the script, you must run the `cli` object.
+To be able to run the script, you must run the `cli` class.
 
 ```python
 cli.run()
@@ -102,11 +186,11 @@ cli.run()
 To create a custom function for the Exit, rather than outright exiting the current menu, you can just do something like this:
 
 ```python
-def exitFunction(): # No parameters!!
+def exitFunction():
   if input("Are you sure? (Y/n)\n> ").lower().startswith("y"):
     cli.exit()
 
-cli.run(exitFunction=exitFunction, exitName="Exit Confirmation")
+cli.run(exitFunction=exitFunction, exitLabel="Exit Confirmation")
 ```
 
 > [!TIP]
@@ -115,58 +199,3 @@ cli.run(exitFunction=exitFunction, exitName="Exit Confirmation")
 ---
 
 This runs the cli object with all the functions and items you have created.
-
-You should be greeted with this once you run the script with Python.
-
-```
-My amazing CLI Script
-> Print "Hello, World!"
-  Exit
-Use UP and DOWN arrow to navigate, press ENTER to select.
-```
-
-When pressing ENTER while the first option is selected, it should look like this afterward.
-
-```
-My amazing CLI Script
-> Print "Hello, World!"
-  Exit
-Use UP and DOWN arrow to navigate, press ENTER to select.
-Hello, World!
-```
-
-> [!NOTE]
-> There is a bit of a flicker when printing something, but it isn't exactly noticable.
-
-You can also navigate to `Exit` and it'll exit gracefully.
-
-## Advanced Usage
-
-### Submenus
-
-I know, I know, you really want to know how to use submenus and that is FULLY understandable..
-
-Why would you need sub-menus?
-
-- If there's too much to put in one menu. simple as that.
-
-Here's how
-
-```python
-from cli import CLI # Import CLI from cli/__init__.py if it's within the subdirectory "cli"
-
-cli = CLI(title="Submenu Test")
-
-@cli.item("Open submenu item")
-def submenu1():
-    # Create a new, independent CLI instance for the submenu.
-    submenu = CLI(title="Submenu 1")
-
-    @submenu.item("Hello!")
-    def goodEvening(): # Function for the item
-        submenu.print("Howdy!") # Prints "Howdy!"
-
-    submenu.run(exitMessage="Go back") # Runs the submenu with a custom exit label
-
-cli.run() # Run the main menu
-```
