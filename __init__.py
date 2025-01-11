@@ -348,6 +348,7 @@ class CLI():
         curses.curs_set(0)
         stdscr.clear()
         stdscr.refresh()
+        stdscr.timeout(1000) # 1s timeout, so if anything updates, you dont have to do anything.
 
         self.stdscr = stdscr
         self.running = True
@@ -481,6 +482,8 @@ class CLI():
                 try:
                     stdscr.refresh()
                     key = stdscr.getch()
+                    if key == -1: # when timeout finishes
+                        continue
                     if key == curses.KEY_RESIZE:
                         continue
                     elif key == curses.KEY_UP:
