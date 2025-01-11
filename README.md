@@ -29,6 +29,7 @@ There are *some* issues with Linux and this CLI menu shenanagin, BUT, you can [f
 
 ### Additional Resources
 - **Documentation**
+  - [V0 Documentation](./Archival/V0/Documentation.md)
   - [V1 Documentation](./Archival/V1/Documentation.md)
   - [V2 Documentation](./Documentation.md)
 - **License**: [Ideal License (ILi)](./LICENSE)
