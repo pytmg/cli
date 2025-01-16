@@ -1,3 +1,7 @@
+"""
+Good luck trying to figure this out.
+"""
+
 try:
     import keyboard
     import ansi
