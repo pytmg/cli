@@ -26,6 +26,9 @@ Download the `cli` GitHub Repository
 
 - Using git
   - `git clone https://github.com/pytmg/cli.git`
+  - `git checkout v1` or `git switch v1`
+  - and if you want to go back to the latest version
+    - Swap `v1` in the `checkout/switch` commands for `main`
 - ZIP
   - [Download pytmg/cli ZIP](https://github.com/pytmg/cli/archive/refs/heads/v1.zip)
   - and then extract it
