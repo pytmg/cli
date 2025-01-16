@@ -246,7 +246,7 @@ Example Usage
 
 from cli import CLI, Option, Border
 
-border = Border("Single")
+border = Border(Type="Single")
 
 cli = CLI(borders=border)
 
