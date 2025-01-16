@@ -23,7 +23,7 @@ There are *some* issues with Linux and this CLI menu shenanagin, BUT, you can [f
 
 ### Additional Resources
 - **Documentation**
-  - [V0 Documentation](./Archival/V0/Documentation.md)
+  - [V0 Documentation](https://github.com/pytmg/cli/blob/v1/Documentation.md)
   - [V1 Documentation](https://github.com/pytmg/cli/blob/v1/Documentation.md)
   - [V2 Documentation](./Documentation.md)
 - **License**: [Ideal License (ILi)](./LICENSE)
