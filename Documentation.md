@@ -27,7 +27,7 @@ Download the `cli` GitHub Repository
 - Using git
   - `git clone https://github.com/pytmg/cli.git`
 - ZIP
-  - [Download pytmg/cli ZIP](https://github.com/pytmg/cli/archive/refs/heads/main.zip)
+  - [Download pytmg/cli ZIP](https://github.com/pytmg/cli/archive/refs/heads/v1.zip)
   - and then extract it
   
 > [!NOTE]
