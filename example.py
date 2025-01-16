@@ -1,6 +1,6 @@
-from __init__ import ( CLI, Option ) # cli.beta
+from __init__ import ( CLI, Option ) # cli v2
 
-cli = CLI(title="pytmg CLI | V2-beta")
+cli = CLI(title="pytmg CLI | V2")
 
 cli.addItem(Option.Default(
     name="Option 1",
