@@ -486,20 +486,20 @@ class CLI():
                         continue
                     if key == curses.KEY_RESIZE:
                         continue
-                    elif key == curses.KEY_UP:
+                    elif key == curses.KEY_UP or key == 450:
                         self.selectedIDX -= 1
                         self.selectedIDX %= len(self.options)
                         continue
-                    elif key == curses.KEY_DOWN:
+                    elif key == curses.KEY_DOWN or key == 456:
                         self.selectedIDX += 1
                         self.selectedIDX %= len(self.options)
                         continue
-                    elif key == curses.KEY_RIGHT:
+                    elif key == curses.KEY_LEFT or key == 454:
                         self.selectedIDX += self.ColumnLength
                         if self.selectedIDX > len(self.options):
                             self.selectedIDX = len(self.options)-1
                         continue
-                    elif key == curses.KEY_LEFT:
+                    elif key == curses.KEY_RIGHT or key == 452:
                         self.selectedIDX -= self.ColumnLength
                         if self.selectedIDX < 0:
                             self.selectedIDX = 0
