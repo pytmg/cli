@@ -67,4 +67,4 @@ cli.addItem(Option.Boolean(
     keybind="b"
 ))
 
-cli.run()
+cli()

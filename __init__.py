@@ -19,6 +19,7 @@
     ```"""
 
 import curses
+from typing import overload
 
 class Vector2():
     """A 2D Vector"""
@@ -270,6 +271,63 @@ class CLI():
         self.exitAdded = True
         curses.wrapper(self.main)
 
+    @overload
+    def addItem(self, name, description, function, args = (), keybind = None) -> int:
+        """Create (Option.Default) and add an option to the menu
+
+        Params:
+            name: str - The name of the option
+            description: str - The description of the option
+            function: function - The function to run when the option is selected
+            args: tuple - The arguments to pass to the function
+            keybind: str - The keybind to select the option
+            
+        Returns:
+            int - The index of the option in the options list"""
+        return self.addItem(Option.Default(name, description, function, args, keybind))
+
+    @overload
+    def addItem(self, name, description, default: bool, keybind = None) -> int:
+        """Create (Option.Boolean) and add an option to the menu
+
+        Params:
+            name: str - The name of the option
+            description: str - The description of the option
+            default: bool - The default value of the option
+            keybind: str - The keybind to select the option
+            
+        Returns:
+            int - The index of the option in the options list"""
+        return self.addItem(Option.Boolean(name, description, default, keybind))
+
+    @overload
+    def addItem(self, name, description, default: str, keybind = None) -> int:
+        """Create (Option.Input.String) and add an option to the menu
+
+        Params:
+            name: str - The name of the option
+            description: str - The description of the option
+            default: str - The default value of the option
+            keybind: str - The keybind to select the option
+            
+        Returns:
+            int - The index of the option in the options list"""
+        return self.addItem(Option.Input.String(name, description, default, keybind))
+
+    @overload
+    def addItem(self, name, description, default: int, keybind = None) -> int:
+        """Create (Option.Input.Number) and add an option to the menu
+
+        Params:
+            name: str - The name of the option
+            description: str - The description of the option
+            default: int - The default value of the option
+            keybind: str - The keybind to select the option
+            
+        Returns:
+            int - The index of the option in the options list"""
+        return self.addItem(Option.Input.Number(name, description, default, keybind))
+        
     def addItem(self, option: Option.Base) -> int:
         """Add an option to the menu
 
@@ -312,7 +370,6 @@ class CLI():
             self.options.append(exit_option)
         
         return idx
-
 
     def getValueByIndex(self, index):
         """Get the value of an option at a specific index
@@ -534,3 +591,13 @@ class CLI():
                     stdscr.addstr(0,0, "Too Small!")
                     stdscr.refresh()
                     stdscr.getch()
+
+    def __call__(self, exitLabel = "Exit", exitDescription = "Exits the program.", exitFunction = None, exitArguments = ()) -> None:
+        """Run the CLI
+
+        Params:
+            exitLabel: str - The name of the exit option
+            exitDescription: str - The description of the exit option
+            exitFunction: function - The function to run when the exit option is selected
+            exitArguments: tuple - The arguments to pass to the exit function"""
+        self.run(exitLabel, exitDescription, exitFunction, exitArguments)
