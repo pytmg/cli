@@ -7,17 +7,21 @@
 
 # V2 - The Looks Edition
   - Looks way better! Using "curses" and has more general improvements.
+    - Curses is used to allow more control over the UI and how everything looks.
+
+# V3-beta1 - The Themes Edition
+  - Complete rework, looks SO much better, also uses "curses" and has far more improvements compared to V2. Added mouse support.
 
 > [!NOTE]
-> This is the latest version - V2
+> This is the latest version - V3
 
-|                |          V0          |                V1                 |                  V2                  |
-| -------------- | :------------------: | :-------------------------------: | :----------------------------------: |
-| Structure      | Basic - Not classed. | Introduced Classes, more modular. |        Fully Object Oriented         |
-| Options        |    Not very clear    |    Basic, names and functions     | Advanced, Names, Descriptions, Types |
-| User Input     |         N/A          |                N/A                |             Can be used              |
-| Output Area    |     Implemented      |            Implemented            |              Dedicated               |
-| Keybinds       |         None         |               None                |             Implemented              |
-| Error Handling |      Good Luck       |               Some                |                 Some                 |
-| Navigation     |        Usable        |              Usable               |             Very useful              |
-| Customisation  |        Scarse        |              Scarse               |        Some here, some there.        |
+| |V0|V1|V2|V3|
+|-|:-:|:-:|:-:|:-:|
+|Structure|Basic - Not classed.|Introduced Classes, more modular.|Fully Object Oriented|Fully Object Oriented|
+|Options|Names and functions|Names and functions|Names, Descriptions, Types|Names, Descriptions, Functions|
+|User Input|N/A|N/A|Existent|None yet|
+|Output Area|Implemented|Implemented|Dedicated|None yet|
+|Keybinds|None|None|Implemented|None|
+|Error Handling|Good Luck|Some|Some|No Errors Found|
+|Navigation|Usable|Usable|Extended|Usable with Mouse|
+|Customisation|Scarse|Scarse|Config - No actual customisation|Themes and colouring|

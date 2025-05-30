@@ -1,603 +1,432 @@
-"""CLI-V2
+"""CLI-V3"""
+from typing import Callable, Union
+import curses, itertools
 
-- Authors:
-    - [pytmg](https://github.com/pytmg)
-
-- Example Usage:
-
-    ```python
-    from cli import CLI, Option
-
-    cli = CLI()
-
-    def goodMorning():
-        cli.print("Good Morning!")
-
-    cli.addItem(Option.Default("Good morning!", "Say \\"Good Morning\\"", goodMorning, ()))
-
-    cli.run()
-    ```"""
-
-import curses
-from typing import overload
-
-class Vector2():
-    """A 2D Vector"""
-    def __init__(self, x: int = 0, y: int = 0):
-        """Create a new Vector2"""
-        self.x = x
-        self.y = y
-
-def is_iterable(obj):
-    return hasattr(obj, '__iter__')
-
-def get_input(stdscr: curses.window, prompt:str="", numOnly: bool = False):
-    height, width = stdscr.getmaxyx()
-    stdscr.refresh()
-    stdscr.keypad(True)
-
-    WindowHeight, WindowWidth = int(height*0.8), int(width*0.8)
-
-    # Create a window to take input
-    input_win = curses.newwin(WindowHeight, WindowWidth, (height // 2) - (WindowHeight // 2), (width // 2) - (WindowWidth // 2))
-    input_win_win = curses.newwin(WindowHeight-3, WindowWidth-6, (height // 2) - (WindowHeight // 2) + 2, (width // 2) - (WindowWidth // 2)+3)
-    # Store the input string
-    input_str = ''
-    
-    while True:
-        input_win.clear()
-        if WindowHeight > 3 and WindowWidth > 2:
-            for h in range(WindowHeight):
-                for w in range(WindowWidth):
-                    if h == 1:
-                        if w == 1:
-                            input_win.addstr(h, w, "╔")
-                        elif 1 < w < WindowWidth - 2:
-                            input_win.addstr(h, w, "═")
-                        elif w == WindowWidth - 2:
-                            input_win.addstr(h, w, "╗")
-                    elif 1 < h < WindowHeight - 1:
-                        if w == 1:
-                            input_win.addstr(h, w, "║")
-                        elif w == WindowWidth - 2:
-                            input_win.addstr(h, w, "║")
-                    elif h == WindowHeight - 1:
-                        if w == 1:
-                            input_win.addstr(h, w, "╚")
-                        elif 1 < w < WindowWidth - 2:
-                            input_win.addstr(h, w, "═")
-                        elif w == WindowWidth - 2:
-                            input_win.addstr(h, w, "╝")
-        if len(prompt) <= WindowWidth - 5:
-            input_win.addstr(1, 3, f"  {prompt}  ")
-        else:
-            input_win.addstr(1, 3, f"  {prompt[:WindowWidth-5]}...  ")
-        input_win.refresh()
-        input_win_win.clear()
-        Area = (WindowHeight-3) * (WindowWidth-6) - 1
-        if len(input_str) >= Area:
-            input_str = input_str[:Area]
-        input_win_win.addstr(0, 0, input_str + " ")
-        input_win_win.refresh()
-        char = input_win_win.getch()
-        
-        if char == 10:  # Enter key (newline)
-            break
-        elif char == 27:  # Escape key
-            return None
-        elif char == 263 or char == 127 or char == 8:  # Backspace
-            input_str = input_str[:-1]
-        elif (numOnly and (char in range(48, 58) or char in range(96, 106))) or (not numOnly and 32 <= char <= 126):
-            if numOnly:
-                input_str += chr(char if char < 96 else char - 48)  # Convert keypad numbers to number row
-            else:
-                input_str += chr(char)
-                continue
-
-    return input_str if not numOnly else int(input_str)
+class classproperty(property):
+    def __get__(self, obj, objtype=None):
+        return self.fget(objtype)
 
 class Config:
-    """Configuration for CLI"""
-    def __init__(self, *, ShowOutput: bool = True, ShowDescription: bool = True, ShowTitle: bool = True, AutoScale: bool = True):
-        self.showout = ShowOutput
-        self.showdesc = ShowDescription
-        self.title = ShowTitle
-        self.scale = AutoScale
+    def __init__(self, UseMouse: bool = True):
+        self.Mouse = UseMouse
 
-class Border:
-    """CLI Border"""
-    def __init__(self, *, Type: str = "Double"):
-        self.types = ["Double", "Single"]
-        if Type not in self.types:
-            print("Invalid Type, using default..")
-            Type = "Double"
-        Type = self.types.index(Type)
-        self.topLeft = "╔┌"[Type]
-        self.topRight = "╗┐"[Type]
-        self.bottomLeft = "╚└"[Type]
-        self.bottomRight = "╝┘"[Type]
-        self.horizontal = "═─"[Type]
-        self.vertical = "║│"[Type]
-        self.rightToLeft = "╣┤"[Type]
-        self.leftToRight = "╠├"[Type]
-        self.topToBottom = "╦┬"[Type]
-        self.bottomToTop = "╩┴"[Type]
-        self.intersection = "╬┼"[Type]
+class Utility:
+    class Colour:
+        def __init__(self, fg: int, bg: int):
+            self.fg = fg
+            self.bg = bg
+
+        def AttrON(self, menu):
+            """
+            Apply color attr
+            """
+            theme = menu.theme
+            menu.stdscr.attron(curses.color_pair(theme.GetPair(self.fg, self.bg)))
+
+        def AttrOFF(self, menu):
+            """
+            Remove color attr
+            """
+            theme = menu.theme
+            menu.stdscr.attroff(curses.color_pair(theme.GetPair(self.fg, self.bg)))
+
+    @staticmethod
+    def addstr(menu, y: int, x: int, string: str):
+        stdscr = menu.stdscr
+        offset = 0
+        changingCol = False
+        currentColor = Utility.Colour(curses.COLOR_WHITE, curses.COLOR_BLACK)
+        isBG = None
+        ignoreNext = False
+        for i, char in enumerate(string):
+            if not ignoreNext:
+                if char == "\\":
+                    offset += 1
+                    ignoreNext = True
+                    continue
+                if char == "/":
+                    offset += 1
+                    if changingCol:
+                        changingCol = False
+                        if (isBG == False): # cuz isBG can be None, so we wanna be exact
+                            currentColor.AttrOFF(menu)
+                            currentColor = Utility.Colour(curses.COLOR_WHITE, curses.COLOR_BLACK)
+                    else:
+                        changingCol = True
+                        isBG = False
+                    continue
+                if changingCol:
+                    offset += 1
+                    cols = {
+                        'g': curses.COLOR_GREEN,
+                        'G': 10,  # Bright Green
+                        'b': curses.COLOR_BLUE,
+                        'B': 9,  # Bright Blue
+                        'r': curses.COLOR_RED,
+                        'R': 12,  # Bright Red
+                        'y': curses.COLOR_YELLOW,
+                        'Y': 14,  # Bright Yellow
+                        'w': curses.COLOR_WHITE,
+                        'm': curses.COLOR_MAGENTA,
+                        'M': 13,  # Bright Magenta
+                        'c': curses.COLOR_CYAN,
+                        'C': 11,  # Bright Cyan
+                        'k': curses.COLOR_BLACK,
+                        'z': 8,
+                        'x': "x"
+                    }
+                    if char in cols:
+                        if isBG == False:
+                            if char != "x":
+                                currentColor.fg = cols[char]
+                            isBG = True
+                        elif isBG == True:
+                            if char != "x":
+                                currentColor.bg = cols[char]
+                            isBG = None
+                    elif char == "/":
+                        if isBG is False:
+                            currentColor.AttrOFF(menu)
+                        currentColor = Utility.Colour(curses.COLOR_WHITE, curses.COLOR_BLACK)
+                        changingCol = False
+                        isBG = None
+                    else:
+                        continue
+                    continue
+                ignoreNext = False
+            currentColor.AttrON(menu)
+            stdscr.addstr(y, (x+i)-offset, char.lower() if menu.theme.loweronly else (char.upper() if menu.theme.UPPERONLY else char))
+            currentColor.AttrOFF(menu)
+
+    @staticmethod
+    def InitAllColourPairs():
+        curses.start_color()
+        colors = [
+            curses.COLOR_GREEN,
+            10,  # Bright Green
+            curses.COLOR_BLUE,
+            9,  # Bright Blue
+            curses.COLOR_RED,
+            12,  # Bright Red
+            curses.COLOR_YELLOW,
+            14,  # Bright Yellow
+            curses.COLOR_WHITE,
+            curses.COLOR_MAGENTA,
+            13,  # Bright Magenta
+            curses.COLOR_CYAN,
+            11,  # Bright Cyan
+            curses.COLOR_BLACK,
+            8
+        ]
+        
+        pair_mapping = {}
+        pair_number = 1  # pair 0 is reserved, start from 1
+        
+        for fg, bg in itertools.product(colors, repeat=2):
+            curses.init_pair(pair_number, fg, bg)
+            pair_mapping[(fg, bg)] = pair_number
+            pair_number += 1
+        
+        return pair_mapping
 
 class Option:
-    """Options for the CLI"""
-    class Base():
-        """Base class for options. - Only use this for type hints."""
-        def __init__(self):
-            self.name = ""
-            self.description = ""
-            self.keybind = None
-            self.args = ()
-            self.function = CLI.doNothing
-            self.value = None
+    def __init__(self, name: str, description: str, action: Callable = None, params: tuple = (), disabled: bool = False):
+        self.name = name
+        self.description = description
+        self.action = action
+        self.params = params
+        self.disabled = disabled
 
-        def INTERACTION(self, *, stdscr: curses.window):
-            pass
+    def act(self):
+        if callable(self.action):
+            self.action(*self.params)
 
-    class Default(Base):
-        """Runs a function when selected"""
-        def __init__(self, name, description, function, args = (), keybind = None):
-            self.name = name
-            self.description = description
-            self.function = function
-            self.args = args
-            self.keybind = keybind
-
-        def INTERACTION(self, *, stdscr: curses.window):
-            self.function(*self.args) if is_iterable(self.args) else self.function(self.args)
-            
-    class Boolean(Base):
-        """Boolean (On/Off)"""
-        def __init__(self, name, description, default = False, keybind = None):
-            self.name = name
-            self.description = description
-            self.value = default
-            self.default = default
-            self.keybind = keybind
-
-        def INTERACTION(self, *, stdscr: curses.window):
-            self.value = not self.value
-
-    class Input(Base):
-        class Base():
-            """Base class for input options."""
-            pass
-
-        class String(Base):
-            """String input"""
-            def __init__(self, name, description, default = "", keybind = None):
-                self.name = name
-                self.description = description
-                self.value = default
-                self.default = default
-                self.keybind = keybind
-
-            def INTERACTION(self, *, stdscr: curses.window):
-                self.value = get_input(stdscr=stdscr, prompt=self.name)
-
-        class Number(Base):
-            """Number input"""
-            def __init__(self, name, description, default = 0, keybind = None):
-                self.name = name
-                self.description = description
-                self.value = default
-                self.default = default
-                self.keybind = keybind
-            
-            def INTERACTION(self, *, stdscr: curses.window):
-                self.value = get_input(stdscr=stdscr, prompt=self.name, numOnly=True)
-
-class CLI():
-    """The CLI
+    def __str__(self):
+        return self.name
     
-    Usage:
-    ```python
-    from cli import CLI, Option
+    def __dict__(self):
+        return {
+            "name": self.name,
+            "description": self.description
+        }
+    
+    def __call__(self):
+        return self.act()
 
-    cli = CLI("YourTitleHere")
-    idx = cli.addItem(
-        Option.Default(
-            name="Hello World",
-            description="Prints 'Hello, World!'",
-            function=cli.print,
-            args=("Hello, World!",)
-        )
-    )
-    cli.run()
-    """
-    def __init__(self, title: str = "No title provided", config: Config = Config(), borders: Border = Border()):
-        """Create a new CLI
+class Themes:
+    class Default:
+        def __init__(self):
+            # Set up all combinations of colours
+            self.allpairs = "Waiting for start."
+            self.border = []
+            self.theme_name = "Default Theme"
+            self.theme_author = "__builtin__"
+            self.theme_description = "This is the default theme. Uses standard colors and styles."
+            # colour codes
+            #  /FB/ Foreground Background
+            #   g for green
+            #   G for bright green
+            #   b for blue
+            #   B for bright blue
+            #   r for red
+            #   R for bright red
+            #   y for yellow
+            #   Y for bright yellow
+            #   w for white
+            #   m for magenta
+            #   M for bright magenta
+            #   c for cyan
+            #   C for bright cyan
+            #   k for black
+            #   z for gray
+            #   x for no change
+            #  // Reset
+            self.title = "[title]"
+            self.defaultOption = "  [option]"
+            self.disabledOption = "  /zx/[option]//"
+            self.selectedOption = "/gx/>// [option]"
+            self.description = "Description\n  /gx/[description]"
+            self.footer = "[↑ ↓ enter | q = /gx/quit//]"
+            self.output = "Output\n  /gx/[output]"
+            self.arrows = ["▲", "▼"]
+            self._loweronly = False
+            self._UPPERONLY = False
+
+        @property
+        def loweronly(self) -> bool:
+            return self._loweronly
         
-        Params:
-            title: str - The title of the CLI"""
-        self.title = str(title) if type(title) != str else title
-        self.selectedIDX = 0
-        self.printStatement = ""
-        self.running = False
-        self.exitAdded = False
-        self.options = []
+        @loweronly.setter
+        def loweronly(self, value: bool):
+            if not isinstance(value, bool):
+                raise TypeError("loweronly must be a boolean value.")
+            self._loweronly = value
+            if self._UPPERONLY:
+                self._UPPERONLY = not value
+
+        @property
+        def UPPERONLY(self) -> bool:
+            return self._UPPERONLY
+        
+        @UPPERONLY.setter
+        def UPPERONLY(self, value: bool):
+            if not isinstance(value, bool):
+                raise TypeError("UPPERONLY must be a boolean value.")
+            self._UPPERONLY = value
+            if self._loweronly:
+                self._loweronly = not value
+
+        def initcols(self):
+            self.allpairs = Utility.InitAllColourPairs()
+
+        def GetPair(self, fg: int, bg: int) -> int:
+            """
+            Get the color pair number for the given foreground and background colors.
+            """
+            if self.allpairs == "Waiting for start.":
+                raise RuntimeError("All colours not initialised. Call init() first.")
+            return self.allpairs.get((fg, bg), 0)
+        
+        def init(self):
+            self.initcols()
+
+    class BlueDefault(Default):
+        def __init__(self):
+            super().__init__()
+            self.theme_name = "Blue Default Theme"
+            self.theme_description = "The default theme with blue accents rather than green."
+            self.selectedOption = "/Bx/>// [option]"
+            self.description = "Description\n  /Bx/[description]"
+            self.output = "Output\n  /Bx/[output]"
+            self.footer = "[↑ ↓ enter | q = /Bx/quit//]"
+
+    class Colourless(Default):
+        def __init__(self):
+            super().__init__()
+            self.theme_name = "Colourless Default Theme"
+            self.theme_description = "The default theme without colours"
+            self.selectedOption = "> [option]"
+            self.disabledOption = "x [option]"
+            self.description = "Description\n  [description]"
+            self.output = "Output\n  [output]"
+            self.footer = "[↑ ↓ enter | q = quit]"
+
+    @classproperty
+    def themelist(cls) -> list[type]:
+        return [
+            member for name, member in vars(cls).items()
+            if isinstance(member, type) and issubclass(member, cls.Default)
+        ]
+
+class Menu:
+    def __init__(self, title: str, opts: list[Option] = None, theme: Themes.Default = Themes.Default(), config: Config = Config()):
         self.stdscr = None
-        self.ColumnLength = 0
-        self.dimensions = 0,0
+        self.opts = opts or []
         self.config = config
-        self.border = borders
-        self.initial = Vector2()
-
+        self.selected = 0
+        self.title = title
+        self.theme = theme
+        self.running = False
+        self.printmsg = ""
+        self.ScrollOpts = 0
+    
     def exit(self):
-        """Exit the CLI"""
         self.running = False
 
-    def print(self, *args) -> None:
-        """Print a statement to the output area
-        
-        Params:
-            *args: str - The statement to print
-            
-        Returns:
-            None"""
-        args = [str(arg) for arg in args]
-        self.printStatement = "".join(args)
-
-    def input(self, *args) -> str:
-        """Get input from the user
-
-        Params:
-            *args: str - The prompt to display to the user
-            
-        Returns:
-            str - The input from the user"""
-        return get_input(stdscr=self.stdscr, prompt=" ".join(args))
-
-    def run(self, exitLabel = "Exit", exitDescription = "Exits the program.", exitFunction = None, exitArguments = ()) -> None:
-        """Run the CLI
-
-        Params:
-            exitLabel: str - The name of the exit option
-            exitDescription: str - The description of the exit option
-            exitFunction: function - The function to run when the exit option is selected
-            exitArguments: tuple - The arguments to pass to the exit function"""
-        self.addItem(Option.Default(
-            name=exitLabel,
-            description=exitDescription,
-            function=exitFunction or self.exit,
-            args=exitArguments,
-            keybind="q"
-        )) if not self.exitAdded else 0
-        self.exitAdded = True
-        curses.wrapper(self.main)
-
-    @overload
-    def addItem(self, name, description, function, args = (), keybind = None) -> int:
-        """Create (Option.Default) and add an option to the menu
-
-        Params:
-            name: str - The name of the option
-            description: str - The description of the option
-            function: function - The function to run when the option is selected
-            args: tuple - The arguments to pass to the function
-            keybind: str - The keybind to select the option
-            
-        Returns:
-            int - The index of the option in the options list"""
-        return self.addItem(Option.Default(name, description, function, args, keybind))
-
-    @overload
-    def addItem(self, name, description, default: bool, keybind = None) -> int:
-        """Create (Option.Boolean) and add an option to the menu
-
-        Params:
-            name: str - The name of the option
-            description: str - The description of the option
-            default: bool - The default value of the option
-            keybind: str - The keybind to select the option
-            
-        Returns:
-            int - The index of the option in the options list"""
-        return self.addItem(Option.Boolean(name, description, default, keybind))
-
-    @overload
-    def addItem(self, name, description, default: str, keybind = None) -> int:
-        """Create (Option.Input.String) and add an option to the menu
-
-        Params:
-            name: str - The name of the option
-            description: str - The description of the option
-            default: str - The default value of the option
-            keybind: str - The keybind to select the option
-            
-        Returns:
-            int - The index of the option in the options list"""
-        return self.addItem(Option.Input.String(name, description, default, keybind))
-
-    @overload
-    def addItem(self, name, description, default: int, keybind = None) -> int:
-        """Create (Option.Input.Number) and add an option to the menu
-
-        Params:
-            name: str - The name of the option
-            description: str - The description of the option
-            default: int - The default value of the option
-            keybind: str - The keybind to select the option
-            
-        Returns:
-            int - The index of the option in the options list"""
-        return self.addItem(Option.Input.Number(name, description, default, keybind))
-        
-    def addItem(self, option: Option.Base) -> int:
-        """Add an option to the menu
-
-        Params:
-            option: Option.Base - Any type of option to add to the menu
-            
-        Returns:
-            int - The index of the option in the options list"""
-        temp = option.name
-        
-        NAMES = []
-
-        for opt in self.options:
-            NAMES.append(opt.name[:])
-
-        if temp in NAMES:
-            number = 1
-            while True:
-                number += 1
-                if f"{temp} ({number})" not in NAMES:
-                    temp = f"{temp} ({number})"
-                    break
-            option.name = temp
-
-        # Handle keybinding conflict
-        if option.keybind:
-            for option2 in self.options:
-                if option.keybind == option2.keybind:
-                    option.keybind = None
-                    break
-
-        # Add the option to the list
-        if not self.exitAdded:
-            idx = len(self.options)
-            self.options.append(option)
+    def AddOption(self, option: Option):
+        if isinstance(option, Option):
+            self.opts.append(option)
         else:
-            exit_option = self.options.pop()
-            idx = len(self.options)
-            self.options.append(option)
-            self.options.append(exit_option)
+            raise TypeError("Option must be an instance of Option class")
         
-        return idx
+    def print(self, *text: str, sep: str = " ", end:str="\n", CLEAR: bool = True):
+        if CLEAR:
+            self.printmsg = sep.join([str(thing) for thing in text]) + end
+        else:
+            self.printmsg += sep.join([str(thing) for thing in text]) + end
 
-    def getValueByIndex(self, index):
-        """Get the value of an option at a specific index
-
-        Params:
-            index: int - The index of the option to get the value of
-        """
-        if isinstance(self.options[index], Option.Default):
-            raise AttributeError("Type 'Option.Default' has no attribute 'value'")
-        return self.options[index].value
-
-    def getValueByName(self, name):
-        """Get the value of an option by its name
-
-        Params:
-            name: str - The name of the option to get the value of
-        """
-        for option in self.options:
-            if option.name == name:
-                if isinstance(option, Option.Default):
-                    raise AttributeError("Type 'Option.Default' has no attribute 'value'")
-                return option.value
-        raise ValueError(f"No option found with the name '{name}'")
-
-    def doNothing(self, *args):
-        """Frankly, does absolutely nothing."""
-        pass
-
-    def main(self, stdscr: curses.window):
-        """Literally the backbone of the entire CLI."""
-        curses.start_color()
-        curses.init_pair(1, curses.COLOR_BLACK, curses.COLOR_WHITE) # Selected Colours
+    def _main(self, stdscr: curses.window):
+        self.stdscr = stdscr
+        self.theme.init()
         curses.curs_set(0)
+        curses.noecho()
+        curses.cbreak()
+        curses.mousemask(curses.ALL_MOUSE_EVENTS | curses.REPORT_MOUSE_POSITION)
+        stdscr.keypad(True)
         stdscr.clear()
         stdscr.refresh()
-        stdscr.timeout(1000) # 1s timeout, so if anything updates, you dont have to do anything.
 
-        self.stdscr = stdscr
-        self.running = True
-        height, width = stdscr.getmaxyx()
-        if self.initial.x == 0 and self.initial.y == 0:
-            self.initial = Vector2(width, height)
+        h, w = stdscr.getmaxyx()
 
-        while self.running: # Main loop
-            if self.config.scale:
-                height, width = stdscr.getmaxyx()
-            else:
-                height, width = self.initial.y, self.initial.x
-            try:
-                height -= 1
-                width -= 2
-                stdscr.clear()
+        while self.running:
+            stdscr.clear()
+            Utility.addstr(self, 0, 0, self.theme.title.replace("[title]", self.title))
 
-                if height > 3 and width > 2:
-                    for h in range(height):
-                        for w in range(width):
-                            if h == 0:
-                                if w == 0:
-                                    stdscr.addstr(h, w, self.border.topLeft)
-                                elif 0 < w < width-1:
-                                    stdscr.addstr(h, w, self.border.horizontal)
-                                elif w == width-1:
-                                    stdscr.addstr(h, w, self.border.topRight)
-                            elif 0 < h < height-1:
-                                if w == 0 or w == width-1:
-                                    stdscr.addstr(h, w, self.border.vertical)
-                            elif h == height-1:
-                                if w == 0:
-                                    stdscr.addstr(h, w, self.border.bottomLeft)
-                                elif 0 < w < width-1:
-                                    stdscr.addstr(h, w, self.border.horizontal)
-                                elif w == width-1:
-                                    stdscr.addstr(h, w, self.border.bottomRight)
-                
-                OptionPosition = Vector2(2, 1)
-                DescriptionAreaPosition = Vector2(2, height-11)
-                OutputAreaPostition = Vector2((width//2) if self.config.showdesc else 2, DescriptionAreaPosition.y)
+            # -- OPTION DISPLAY --
+            visible_lines = h - 3
+            max_visible = min(len(self.opts), visible_lines)
 
-                TITLE = f"{self.border.vertical} {self.title} {self.border.vertical}" if self.config.title else ""
-                X1 = (width//2) - (len(TITLE)//2)
-                X2 = ((width//2) + (len(TITLE)//2)) - (1 if len(TITLE)%2 == 0 else 0)
+            if self.selected < self.ScrollOpts:
+                self.ScrollOpts = self.selected
+            elif self.selected >= self.ScrollOpts + max_visible:
+                self.ScrollOpts = self.selected - max_visible + 1
 
-                self.ColumnLength = height - (17 if self.config.showdesc or self.config.showout else 6)
-                self.dimensions = height, width
-                stdscr.addstr((DescriptionAreaPosition.y-2) if self.config.showdesc or self.config.showout else height-2, DescriptionAreaPosition.x, "Use ↑↓←→ to navigate and press ENTER to select.")
+            self.ScrollOpts = max(0, min(self.ScrollOpts, max(0, len(self.opts) - max_visible)))
 
-                stdscr.addstr(0, X1, self.border.topToBottom) if self.config.title else 0
-                stdscr.addstr(0, X2, self.border.topToBottom) if self.config.title else 0
-
-                for w in range(X1, X2+1):
-                    if w == X1:
-                        stdscr.addstr(OptionPosition.y+1, w, self.border.bottomLeft)
-                    elif X1 < w < X2:
-                        stdscr.addstr(OptionPosition.y+1, w, self.border.horizontal)
-                    elif w == X2:
-                        stdscr.addstr(OptionPosition.y+1, w, self.border.bottomRight)
-
-                if self.config.showdesc or self.config.showout:
-                    for w in range(width):
-                        if w == 0:
-                            stdscr.addstr(DescriptionAreaPosition.y, w, self.border.leftToRight)
-                        elif 0 < w < width-1:
-                            stdscr.addstr(DescriptionAreaPosition.y, w, self.border.horizontal)
-                        elif w == width-1:
-                            stdscr.addstr(DescriptionAreaPosition.y, w, self.border.rightToLeft)
-                    DescriptionAreaPosition.y += 1
-
-                if self.config.showdesc and self.config.showout:
-                    for h in range(OutputAreaPostition.y, height):
-                        if h == OutputAreaPostition.y:
-                            stdscr.addstr(h, OutputAreaPostition.x, self.border.topToBottom)
-                        elif OutputAreaPostition.y < h < height-1:
-                            stdscr.addstr(h, OutputAreaPostition.x, self.border.vertical)
-                        elif h == height-1:
-                            stdscr.addstr(h, OutputAreaPostition.x, self.border.bottomToTop)
-                
-                stdscr.addstr(OutputAreaPostition.y, OutputAreaPostition.x + (2 if self.config.showdesc else 0), " Output ") if self.config.showout else 1
-                OutputAreaPostition.y += 1
-                OutputAreaPostition.x += 2 if self.config.showdesc else 0
-
-                if self.config.showout:
-                    for j, Line in enumerate(self.printStatement.split("\n")):
-                        if len(Line) > (width//2)-3:
-                            stdscr.addstr(OutputAreaPostition.y + j, OutputAreaPostition.x, f"{Line[:(width//2)-6]}...")
-                        else:
-                            stdscr.addstr(OutputAreaPostition.y + j, OutputAreaPostition.x, f"{Line}")
-
-                stdscr.addstr(OptionPosition.y, (width//2) - (len(TITLE)//2), TITLE)
-                OptionPosition.y += 2 if self.config.title else 1
-
-                def render_option(option, Y_POS, X_MULT, max_len=20, isActive = False):
-                    display_name = option.name if len(option.name) <= max_len else option.name[:max_len] + "..."
-                    if isinstance(option, Option.Boolean):
-                        display_value = f" {'[x]' if option.value else '[ ]'}"
-                    else:
-                        display_value = ""
-                    if isActive:
-                        Status = ">"
-                    else:
-                        Status = " "
-                    return f"{Status} {display_name}{display_value}"
-
-                def render_description(stdscr, option, width):
-                    description_lines = option.description.split("\n")
-                    for j, line in enumerate(description_lines):
-                        if len(line) > (width//2)-3:
-                            stdscr.addstr(DescriptionAreaPosition.y + j, DescriptionAreaPosition.x, f"{line[:(width//2)-6]}...")
-                        else:
-                            stdscr.addstr(DescriptionAreaPosition.y + j, DescriptionAreaPosition.x, f"{line}")
-                    if option.keybind:
-                        stdscr.addstr(DescriptionAreaPosition.y + len(description_lines) + 1, DescriptionAreaPosition.x, f"Keybind: {option.keybind.upper()}")
-
-                for i, option in enumerate(self.options):
-                    Y_POS = i % self.ColumnLength
-                    X_MULT = (i // self.ColumnLength) * 25
-
-                    # Call render_option to render the option text
-                    isActive = i == self.selectedIDX
-                    stdscr.attron(curses.color_pair(1)) if isActive else 0
-                    stdscr.addstr(OptionPosition.y + Y_POS, OptionPosition.x + X_MULT, render_option(option, Y_POS, X_MULT, isActive=isActive))
-                    stdscr.attroff(curses.color_pair(1)) if isActive else 0
-
-                    if isActive and self.config.showdesc:
-                        stdscr.addstr(DescriptionAreaPosition.y - 1, DescriptionAreaPosition.x, " Description & Keybind " if option.keybind else " Description ")
-                        render_description(stdscr, option, width)
-
-                try:
-                    stdscr.refresh()
-                    key = stdscr.getch()
-                    if key == -1: # when timeout finishes
-                        continue
-                    if key == curses.KEY_RESIZE:
-                        continue
-                    elif key == curses.KEY_UP or key == 450:
-                        self.selectedIDX -= 1
-                        self.selectedIDX %= len(self.options)
-                        continue
-                    elif key == curses.KEY_DOWN or key == 456:
-                        self.selectedIDX += 1
-                        self.selectedIDX %= len(self.options)
-                        continue
-                    elif key == curses.KEY_LEFT or key == 454:
-                        self.selectedIDX += self.ColumnLength
-                        if self.selectedIDX > len(self.options):
-                            self.selectedIDX = len(self.options)-1
-                        continue
-                    elif key == curses.KEY_RIGHT or key == 452:
-                        self.selectedIDX -= self.ColumnLength
-                        if self.selectedIDX < 0:
-                            self.selectedIDX = 0
-                        continue
-                    elif key == 10:
-                        self.options[self.selectedIDX].INTERACTION(stdscr=self.stdscr)
-                        self.run() if self.running else 0
-                        continue
-                    else:
-                        for option in self.options:
-                            try:
-                                if key == ord(option.keybind):
-                                    option.INTERACTION(stdscr=self.stdscr)
-                                    self.run() if self.running else 0
-                                    continue
-                            except:
-                                pass
-                except KeyboardInterrupt:
-                    pass
-            except curses.error as e:
-                if not str(e).startswith("addwstr()"):
+            for i in range(max_visible):
+                j = self.ScrollOpts + i
+                if j >= len(self.opts):
                     break
-                try:
-                    stdscr.clear()
-                    pos = Vector2(width//2, height//2)
-                    text = "Too Small!"
-                    stdscr.addstr(pos.y, pos.x - (len(text)//2), text)
-                    stdscr.refresh()
-                    stdscr.getch()
-                except curses.error:
-                    stdscr.clear()
-                    stdscr.addstr(0,0, "Too Small!")
-                    stdscr.refresh()
-                    stdscr.getch()
 
-    def __call__(self, exitLabel = "Exit", exitDescription = "Exits the program.", exitFunction = None, exitArguments = ()) -> None:
-        """Run the CLI
+                option = self.opts[j]
 
-        Params:
-            exitLabel: str - The name of the exit option
-            exitDescription: str - The description of the exit option
-            exitFunction: function - The function to run when the exit option is selected
-            exitArguments: tuple - The arguments to pass to the exit function"""
-        self.run(exitLabel, exitDescription, exitFunction, exitArguments)
+                if option.disabled:
+                    string = self.theme.disabledOption.replace("[option]", str(option))
+                else:
+                    string = self.theme.selectedOption.replace("[option]", str(option)) if j == self.selected else self.theme.defaultOption.replace("[option]", str(option))
+
+                if len(string) > w - 2:
+                    string = string[:w - 2]
+
+                Utility.addstr(self, 1 + i, 0, string)
+
+            if self.ScrollOpts > 0:
+                Utility.addstr(self, 1, 0 if (stdscr.inch(1, 0) & 0xFF) == ord(' ') else 1, self.theme.arrows[0])
+
+            if self.ScrollOpts + max_visible < len(self.opts):
+                Utility.addstr(self, max_visible, 0 if (stdscr.inch(max_visible, 0) & 0xFF) == ord(' ') else 1, self.theme.arrows[1])
+
+            # -- DESCRIPTION DISPLAY --
+            desc = self.opts[self.selected].description if self.opts else "No options available."
+            desc_y = 2 + len(self.opts)
+            desc_x = 0
+            if desc_y >= h - len(desc.split("\n")) - 2:
+                desc_y = 0
+                desc_x = w // 2
+            string = "\n".join([line[:(w-desc_x)-1] for line in self.theme.description.split("\n")][:-1])
+            Utility.addstr(self, desc_y, desc_x, string)
+            desc_lines = desc.split("\n")
+            for i, line in enumerate(desc_lines):
+                if desc_y + 1 + i < (h - 2 ):
+                    Utility.addstr(self, desc_y + 1 + i, desc_x, self.theme.description.split("\n")[-1].replace("[description]", line)[:(w-desc_x)-1])
+
+            Utility.addstr(self, stdscr.getmaxyx()[0] - 1, 0, (self.theme.footer + (f"// Theme by: {self.theme.theme_author}//" if self.theme.theme_author != "__builtin__" else ""))[:w-1])
+
+            # -- OUTPUT DISPLAY --
+            outp = self.printmsg
+            outp_y = 0
+            outp_x = w // 2
+            if desc_x != 0:
+                outp_y = len(self.theme.description.replace("[description]", desc).split("\n")) + 1
+            string = "\n".join([line[:(w-outp_x)-1] for line in self.theme.output.split("\n")][:-1])
+            printable = True
+            try:
+                Utility.addstr(self, outp_y, outp_x, string)
+            except:
+                printable = False
+            if printable:
+                outp_lines = outp.split("\n")
+                for i, line in enumerate(outp_lines):
+                    if outp_y + 1 + i < h - 2:
+                        Utility.addstr(self, outp_y + 1 + i, outp_x, self.theme.output.split("\n")[-1].replace("[output]", line)[:(w-outp_x)-1])
+
+            # -- KEYBOARD AND MOUSE HANDLERS --
+            ky = stdscr.getch()
+            
+            # -- MOUSE --
+            if self.config.Mouse:
+                if ky == curses.KEY_MOUSE:
+                    _, x, y, _, bstate = curses.getmouse()
+
+                    if bstate & curses.BUTTON1_CLICKED:
+                        if self.opts:
+                            if not self.opts[self.selected].disabled:
+                                self.opts[self.selected].act()
+                                self.run() if self.running else 0
+                    elif bstate & curses.BUTTON4_PRESSED:
+                        self.selected = (self.selected - 1) % len(self.opts)
+                        while self.opts[self.selected].disabled and len(self.opts) > 1:
+                            self.selected = (self.selected - 1) % len(self.opts)
+                    elif bstate & curses.BUTTON5_PRESSED:
+                        self.selected = (self.selected + 1) % len(self.opts)
+                        while self.opts[self.selected].disabled and len(self.opts) > 1:
+                            self.selected = (self.selected + 1) % len(self.opts)
+                    continue
+
+            # -- KEYBOARD --
+            if ky in [curses.KEY_UP, 450]:
+                self.selected = (self.selected - 1) % len(self.opts)
+                while self.opts[self.selected].disabled and len(self.opts) > 1:
+                    self.selected = (self.selected - 1) % len(self.opts)
+            elif ky in [curses.KEY_DOWN, 456]:
+                self.selected = (self.selected + 1) % len(self.opts)
+                while self.opts[self.selected].disabled and len(self.opts) > 1:
+                    self.selected = (self.selected + 1) % len(self.opts)
+            elif ky == ord('\n'):
+                if self.opts:
+                    if not self.opts[self.selected].disabled:
+                        self.opts[self.selected].act()
+                        self.run() if self.running else 0
+            elif ky == curses.KEY_RESIZE:
+                h, w = stdscr.getmaxyx()
+                stdscr.clear()
+                stdscr.refresh()
+            elif ky == ord('q'):
+                self.running = False
+
+    def run(self):
+        try:
+            self.running = True
+            curses.wrapper(self._main)
+        except Exception as e:
+            curses.endwin()
+            raise e
+        finally:
+            if self.stdscr:
+                curses.endwin()
+    
+    def __call__(self, *args, **kwargs):
+        """
+        Run the menu.
+        """
+        self.run(*args, **kwargs)

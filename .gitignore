@@ -3,13 +3,12 @@
 
 # With exceptions
 !/__init__.py
-!/Archival
 !/Documentation.md
+!/Docs
 !/example.py
 !/README.md
 !/LICENSE
 !/.gitignore
-!/__main__.py
 !/RELEASES*
 
 # Ignore any and all pycache directories

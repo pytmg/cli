@@ -1,256 +1,210 @@
-# CLI-V2 Documentation
+# CLI-V3
 
-Ever wanted CLI Menus to be easier to create? Worry no more with CLI-V2!
+![title](./Docs/TITLE.png)
 
 ## Table of Contents
-- [CLI-V2 Documentation](#cli-v2-documentation)
+- [CLI-V3](#cli-v3)
   - [Table of Contents](#table-of-contents)
-  - [What it is](#what-it-is)
-  - [Installation](#installation)
-    - [Modules](#modules)
-  - [Usage](#usage)
-    - [Initialization](#initialization)
-    - [Adding items](#adding-items)
-      - [Option Types](#option-types)
-        - [Option.Default](#optiondefault)
-        - [Option.Boolean](#optionboolean)
-        - [Option.Input](#optioninput)
-          - [Number](#number)
-          - [String](#string)
-    - [Running the script](#running-the-script)
-      - [Creating a custom Exit function and name](#creating-a-custom-exit-function-and-name)
-    - [Customisability](#customisability)
-      - [Config](#config)
-      - [Border](#border)
+  - [What is CLI?](#what-is-cli)
+  - [How can I use the other versions of CLI?](#how-can-i-use-the-other-versions-of-cli)
+  - [The actual V3 docs](#the-actual-v3-docs)
+    - [How to initialise a menu](#how-to-initialise-a-menu)
+    - [Adding Options](#adding-options)
+      - [Disabled Options](#disabled-options)
+    - [THEMES](#themes)
+      - [Custom Themes](#custom-themes)
+      - [Colour Codes](#colour-codes)
+  - [FAQ](#faq)
+- [Dev Notes](#dev-notes)
 
-## What it is
+## What is CLI?
 
-It's essentially just a CLI Menu script, like `GRUB` if you know what that is, which works by pressing either the up or down arrow keys and enter.
+Essentially, CLI is a framework that's designed to help you create TUI frameworks.
 
-## Installation
+Yes, I know I used the wrong name, I can't be asked changing it.
 
-Download the `cli` GitHub Repository
+## How can I use the other versions of CLI?
 
-- Using git
-  - `git clone https://github.com/pytmg/cli.git`
-- ZIP
-  - [Download pytmg/cli ZIP](https://github.com/pytmg/cli/archive/refs/heads/main.zip)
-  - and then extract it
+You can change the branch you have selected.
+
+- With `git`
+  - ```sh
+    git clone https://github.com/pytmg/cli
+    git checkout (version number)
+    ```
+  - Replace `(version number)` with any of `V0, V1, V2` or `main`
+- With GitHub
+  - ![How to change the branch on GitHub image 1](./Docs/HowToChangeBranch1.png)
+  - Then choose whichever branch you desire, then optionally go to Code and Download ZIP.
+
+Then, check the Documentation for the version you want. (not v0, dont use v0 please i beg)
+
+## The actual V3 docs
+
+### How to initialise a menu
+
+So, initialising a menu is really not that hard to do, really. All you have to know is that menus are renamed from `CLI` (CLI-V1 to 2) to `Menu` in CLI-V3 and above.
+
+```python
+from cli import Menu, Option
+
+menu = Menu(title="My Menu")
+```
+
+### Adding Options
+
+To have a menu, you have to have options.
+
+```python
+# assuming you've done above steps from now on
+
+menu.AddOption(
+    Option( # yup, no other option types (yet)
+        name="My custom option",
+        description="Wow! Options exist!",
+        action=None, # you can also pass a callable function
+        params=() # you can also pass parameters for said callable function
+    )
+)
+
+menu() # can use menu.run() but who cares
+```
+
+![Example](./Docs/Example.png)
+
+All this really does is just add an option with the name `My custom option` and a custom description, the option does nothing (oh hey you dont need a function, that's nice.)
+
+#### Disabled Options
+
+Now this is a new feature, not seen in previous versions of CLI.
+
+If you were to add `disabled=True` to an option - or rather, `option.disabled = True` you'd disable the option from being selected or ran. Very cool! It should also appear as a different colour.
+
+![Disabled Options](./Docs/DisabledOptionExample.png)
+
+Hey, now that's something ELSE new, time for-
+
+### THEMES
+
+<img src="./Docs/THEMES.png" alt="THEMES" style="height: 300px;">
+
+<smaller>see i woulda done it as the title, but the VSCode extension i use for the table of contents doesnt like images, so thats pretty annoying lol</smaller>
+
+OKAY NOW THIS IS SOMETHING I'VE WANTED TO MAKE FOR A WHILE
+
+THEMES!!!! (tada.mp3)
+
+So, how do they work? It's really simple!
+
+*you import Themes and set menu.theme to an initialised class.*
+
+```python
+from cli import Menu, Themes, Option
+
+menu = Menu(title="themed menu", theme=Themes.BlueDefault())
+
+menu.AddOption(
+    Option(
+        name="wow",
+        description="what",
+        action=None,
+        params=()
+    )
+)
+
+menu()
+```
+
+![Theme Example 1](./Docs/ThemeExample1.png)
+
+IT'S BLUE.
+
+#### Custom Themes
+
+It's actually VERY simple to make your own themes. VERY.
+
+Here's an example, I'd like to call it EVERYTHING IS RED. Read the comments in the code for more of an explanation.
+
+```python
+from cli import Themes
+
+EVERYTHINGISRED = Themes.Default() # Just the default theme, reskinned I suppose.
+EVERYTHINGISRED.UPPERONLY = True # Sets everything to purely uppercase
+EVERYTHINGISRED.theme_name = "EVERYTHING IS RED." # the theme name
+EVERYTHINGISRED.theme_author = "/Rx/tmg//" # the author + colour | more on colours soon
+EVERYTHINGISRED.theme_description = "by tmg" # description
+EVERYTHINGISRED.title = "/Rx/[title]//" # title theming | [title] is the placeholder
+EVERYTHINGISRED.defaultOption = "/Rx/  [option]//" # option with 2 space indent
+EVERYTHINGISRED.disabledOption = "/rx/  [option]//" # darker colour
+EVERYTHINGISRED.selectedOption = "/Rx/> [option]//" # option with an arrow
+EVERYTHINGISRED.description = "/Rx/Description\n  /Rx/[description]//" # descriptions :D
+EVERYTHINGISRED.footer = "/Rx/EVERYTHING IS /rx/RED/Rx/. - [↑ ↓ enter | q = quit]//"
+```
+
+![What EIR looks like](./Docs/EIRView.png)
+
+You may have noticed some weird looking codes such as /Rx/ or /rx/
+
+What do they mean?
+
+#### Colour Codes
+
+These can be applied absolutely everywhere, from themes to the user-defined option name.
+
+What are the colour codes?
+
+Here's a neat little image to show you.
+
+![Colour Codes](./Docs/ColourCodes.png)
+
+What does `x` mean?
+- Don't change this colour channel. So, if `x` is in the foreground channel, it skips changing foreground colour, and if it's in the background channel, it skips changing the background colour.
+
+## FAQ
+
+these were never asked, probably won't ever be but who am i to skip on being schizophrenic
+
+- Q: Why doesn't my theme work?
+  - A: Two possibilities, you either messed up the colour tags, OR you didn't use `Themes.Default` as the base. Yes that matters, no it's not because I suck at coding, no it's not because I've been trying to do this for 74 hours straight and could not find a suitable replacement for the system at hand.
+
+- Q: Is there a darkmode?
+  - A: I don't know your terminal, but assuming you're a TOTALLY SANE PERSON, it should be darkmode by default. (who uses lightmode terminals)
+
+- Q: Can I use V0?
+  - Okay, come on, at the VERY least use V1. (V1 is just V0 but object-oriented)
+  - If you do end up actually using V0 successfully, bravo, you're insane. Please get away from me.
   
-> [!NOTE]
-> Use `git clone` in the same directory as your project as it lets you update `cli` easier using `git pull`
+- Q: Are you a stable programmer?
+  - A: No. I have a 3 letter username.
+  
+- Q: What version should I use?
+  - A: V3. Because V2 is a bug hellhole, V1 is.. V1 and V3 just looks nice. Come on.
 
-Place the `cli` folder in the same directory as your script or in a specific folder you want to organize your dependencies.
+- Q: Does this work on Mac?
+  - A: ¯\\\_(ツ)\_/¯
+  
+- Q:
+  - A:
 
-```python
-from Dependencies.cli import CLI, Option
-```
+- Q: Can I add submenus?
+  - Not quite yet. I mean, you can, yes, but its VERY broken at the moment, I'll work on it soon.
 
-Use this if you have it under a directory called `Dependencies`, otherwise, use this
+- Q: How do I use V3?
+  - A: You can start by reading the file you have open right now. Scroll up. READ.
 
-```python
-from cli import CLI, Option
-```
-
-`cli` is the main folder, and the `CLI` and `Option` classes are actually required for the script.
-
-### Modules
-
-There are no modules required, but, you can also install `windows-curses` if you're on Windows and don't have `curses`.
-
-> - windows-curses
->   - for.. compatibility.
-
-That's it!
-
-> [!NOTE]
-> If you're on Windows 10, there's a decent chance that ANSI won't render properly, so you need to run this command in your terminal: `REG ADD HKCU\Console /f /v VirtualTerminalLevel /t REG_DWORD /d 1`
-
-## Usage
-
-### Initialization
-
-Once you have `cli` installed and the class `CLI` imported, you can do
-
-```python
-cli = CLI(title="My amazing CLI Script")
-```
-
-This initializes a CLI object with the title `My amazing CLI Script`, this will appear when you start the CLI.
-
-### Adding items
-
-There are different types of items for CLI.
-
-- Default
-  - The default CLI Option, you need to define and use a function for this one.
-- Boolean
-  - Just an on-off switch
-- Input
-  - Number
-    - Integer input - You can use the numpad OR number row on your keyboard.
-  - String
-    - String input - Just that.
-
-#### Option Types
-
-##### Option.Default
-
-All you need is a function, really.
-
-```python
-NewOption = Option.Default(
-    name="Custom Option",
-    description="Shows the time!",
-    cli.print, # Default print function in CLI()
-    (time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())) # import time btw
-)
-
-cli.addItem(NewOption)
-```
-
-Example output: `2024-12-31 14:30:45`
-
-##### Option.Boolean
-
-Really simple!
-
-```python
-NewBoolOption = Option.Boolean(
-    name="Boolean!",
-    description="On/Off",
-    default=False
-)
-
-NewBoolOptionIDX = cli.addItem(NewBoolOption)
-
-cli.getValueByIndex(NewBoolOptionIDX) # Returns the value of NewBoolOption when called
-```
-
-You can also call `getValueByName` instead if you want to get it by name.
-
-Example:
-
-False
-```
-Boolean! [ ]
-```
-or True
-```
-Boolean! [x]
-```
-
-##### Option.Input
-
-Both of these open an input window.
-
-###### Number
-
-```python
-NewNumberOption = Option.Input.Number(
-    name="Number",
-    description="Input a number!",
-    default=0
-)
-
-cli.addItem(NewNumberOption)
-```
-
-You can read the value with either `cli.getValueByName` or `cli.getValueByIndex`.
-
-`cli.addItem` does also return the index of the item when added!
-
-###### String
-
-```python
-NewStringOption = Option.Input.String(
-    name="String",
-    description="Input a string!",
-    default=""
-)
-
-cli.addItem(NewStringOption)
-```
-
-Same as [Number](#number), you can read the value with `cli.getValueByName` or `cli.getValueByIndex`.
-
-### Running the script
-
-To be able to run the script, you must run the `cli` class.
-
-```python
-cli.run()
-```
+- Q: Create a new V0 version!
+  - A: this isnt even a question
+  
+- Q: When is V4?
+  - A: Bit early for that, ain't it? Jokes aside, I do plan on working on V4 at *some* point. Dunno when, dunno how, I just know I'll do it at SOME point. (trust)
 
 ---
 
-#### Creating a custom Exit function and name
+# Dev Notes
 
-To create a custom function for the Exit, rather than outright exiting the current menu, you can just do something like this:
-
-```python
-def exitFunction():
-  if input("Are you sure? (Y/n)\n> ").lower().startswith("y"):
-    cli.exit()
-
-cli.run(exitFunction=exitFunction, exitLabel="Exit Confirmation")
-```
-
-> [!TIP]
-> Add `cli.exit()` to your exit function to make it easier for the user to exit the menu. Without it, the user might get stuck in the menu or submenu.
-
----
-
-This runs the cli object with all the functions and items you have created.
-
-### Customisability
-
-You can add more customisability with the `Config` and `Border` classes.
-
-#### Config
-
-This lets you toggle on or off, to your liking, the following:
-- Output Area
-- Description Area
-- Title
-- AutoResizing (Recommended to keep ON)
-
-Example Usage
-
-```python
-from cli import CLI, Option, Config
-
-cfg = Config(ShowTitle=False) # Disables the title at the top
-
-cli = CLI(title="None", config=cfg)
-
-# You can also run `cli.config = cfg` if you don't add it on initialisation
-
-cli.run() # Just adds the Exit option :)
-```
-
-And you'll notice it doesn't say `None` anywhere.
-
-Output and Descriptions can be toggled off, this also removes the boxes, so if you have a lot of options and don't care about the descriptions nor outputs, you can turn these off.
-
-#### Border
-
-Borders are defined within the `Border` class in `__init__.py`, you can add more if you want, by going into the code.
-- Lines `114` to `124` in `__init__.py` are the lines you'll have to add to.
-- Along with `109` just to add the name.
-
-Example Usage
-
-```python
-# Assuming there's still only Double and Single
-
-from cli import CLI, Option, Border
-
-border = Border(Type="Single")
-
-cli = CLI(borders=border)
-
-# And again, you can also run `cli.border = border` if you don't add it on initialisation.
-
-cli.run()
-```
+- code
+- dont code after 11 pm you will have a heart attack
+- colour code parser may be sentient, oops
+- TODO: create an eyesore theme
+- TODO: get more than 23 minutes of sleep
+- TODO: scrap that i need to work on the submenu support
