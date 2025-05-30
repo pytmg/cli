@@ -252,7 +252,7 @@ class Themes:
             self.footer = "[↑ ↓ enter | q = quit]"
 
     @classproperty
-    def themelist(cls) -> list[type]:
+    def themelist(cls) -> list[Default]:
         return [
             member for name, member in vars(cls).items()
             if isinstance(member, type) and issubclass(member, cls.Default)

@@ -1,18 +1,22 @@
 # Example script for CLI-V3beta1
 
-from __init__ import Menu, Option, Themes # use cli instead of __init__
+from cli import Menu, Option, Themes
 
 menu = Menu("Wow!")
+
+selectedTheme = 0
 
 def ThemeChanger():
     submenu = Menu("Theme Changer", theme=menu.theme)
 
     def ChangeTheme(theme: Themes.Default): # all themes are based off Default
-        submenu.exit()
+        submenu.exit() # exits current menu and goes to parent.
+        global selectedTheme
+        selectedTheme = submenu.selected
         menu.theme = theme
-        menu.theme.init()
+        menu.theme.init() # REQUIRED otherwise it will throw a tantrum lol
 
-    for theme in Themes.themelist:
+    for theme in Themes.themelist: # themelist contains class references, not instances.
         thm = theme()
         submenu.AddOption(
             Option(
@@ -23,13 +27,15 @@ def ThemeChanger():
             )
         )
 
+    submenu.selected = selectedTheme
+
     submenu.run()
 
 menu.AddOption(
     Option(
         "Change Theme",
         "Themes? They exist?",
-        ThemeChanger,
+        ThemeChanger, # runs the themechanger submenu
         ()
     )
 )
