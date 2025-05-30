@@ -1,6 +1,6 @@
 # Example script for CLI-V3beta1
 
-from cli import Menu, Option, Themes
+from __init__ import Menu, Option, Themes # dont use __init__ when you're actually using the framework, use "cli"
 
 menu = Menu("Wow!")
 
@@ -16,7 +16,7 @@ def ThemeChanger():
         menu.theme = theme
         menu.theme.init() # REQUIRED otherwise it will throw a tantrum lol
 
-    for theme in Themes.themelist: # themelist contains class references, not instances.
+    for theme in Themes.themelist: # themelist contains class references, not instances. - contains a list of all themes within the Themes class.
         thm = theme()
         submenu.AddOption(
             Option(
