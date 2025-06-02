@@ -67,7 +67,7 @@ def ColourExample():
             Option.Callable(
                 f"/{code}/{code}// (\\/{code}/)",
                 "Woah!",
-                menu.print,
+                submenu.print,
                 (f"/{code}/Colour Code:", code)
             )
         )
