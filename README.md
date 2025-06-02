@@ -15,6 +15,9 @@ It’s **super easy to use**:
 3. Check out the Docs - [Documentation.md](./Documentation.md)
 4. Have fun building!
 
+> [!WARNING]
+> Non-NT based systems tend to get a `curses.ERR` a lot. Especially when exiting menus.
+
 ---
 
 ### Additional Resources

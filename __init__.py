@@ -1,6 +1,6 @@
 """CLI-V3"""
 from typing import Callable, Union
-import curses, itertools
+import curses, itertools, os
 
 class classproperty(property):
     def __get__(self, obj, objtype=None):
@@ -130,34 +130,68 @@ class Utility:
         return pair_mapping
 
 class Option:
-    def __init__(self, name: str, description: str, action: Callable = None, params: tuple = (), disabled: bool = False):
-        self.name = name
-        self.description = description
-        self.action = action
-        self.params = params
-        self.disabled = disabled
+    class OPTION:
+        def __init__(self, name: str, description: str, action: Callable = None, params: tuple = (), disabled: bool = False, value: Union[bool, None] = None):
+            self.name = name
+            self.description = description
+            self.action = action
+            self.params = params
+            self.disabled = disabled
+            self.value = value
 
-    def act(self):
-        if callable(self.action):
-            self.action(*self.params)
+        def act(self):
+            return
 
-    def __str__(self):
-        return self.name
+    class Callable(OPTION):
+        def __init__(self, name: str, description: str, action: Callable = None, params: tuple = (), disabled: bool = False):
+            self.name = name
+            self.description = description
+            self.action = action
+            self.params = params
+            self.disabled = disabled
+
+        def act(self):
+            if callable(self.action):
+                self.action(*self.params)
+
+        def __str__(self):
+            return self.name
+        
+        def __dict__(self):
+            return {
+                "name": self.name,
+                "description": self.description
+            }
+        
+        def __call__(self):
+            return self.act()
     
-    def __dict__(self):
-        return {
-            "name": self.name,
-            "description": self.description
-        }
-    
-    def __call__(self):
-        return self.act()
+    class Boolean(OPTION):
+        def __init__(self, name: str, description: str, value: bool = False, disabled: bool = False):
+            super().__init__(name=name, description=description, disabled=disabled)
+            self.value = value
+
+        def act(self):
+            self.value = not self.value
+
+        def __str__(self):
+            return self.name
+        
+        def __dict__(self):
+            return {
+                "name": self.name,
+                "description": self.description,
+                "value": self.value
+            }
+        
+        def __call__(self):
+            return self.act()
 
 class Themes:
     class Default:
         def __init__(self):
             # Set up all combinations of colours
-            self.allpairs = "Waiting for start."
+            self.allpairs = "Waiting for init."
             self.border = []
             self.theme_name = "Default Theme"
             self.theme_author = "__builtin__"
@@ -185,6 +219,7 @@ class Themes:
             self.defaultOption = "  [option]"
             self.disabledOption = "  /zx/[option]//"
             self.selectedOption = "/gx/>// [option]"
+            self.boolean = " [x]?OR? [ ]"
             self.description = "Description\n  /gx/[description]"
             self.footer = "[↑ ↓ enter | q = /gx/quit//]"
             self.output = "Output\n  /gx/[output]"
@@ -223,7 +258,7 @@ class Themes:
             """
             Get the color pair number for the given foreground and background colors.
             """
-            if self.allpairs == "Waiting for start.":
+            if self.allpairs == "Waiting for init.":
                 raise RuntimeError("All colours not initialised. Call init() first.")
             return self.allpairs.get((fg, bg), 0)
         
@@ -236,6 +271,7 @@ class Themes:
             self.theme_name = "Blue Default Theme"
             self.theme_description = "The default theme with blue accents rather than green."
             self.selectedOption = "/Bx/>// [option]"
+            self.boolean = " [x]?OR? [ ]"
             self.description = "Description\n  /Bx/[description]"
             self.output = "Output\n  /Bx/[output]"
             self.footer = "[↑ ↓ enter | q = /Bx/quit//]"
@@ -247,9 +283,26 @@ class Themes:
             self.theme_description = "The default theme without colours"
             self.selectedOption = "> [option]"
             self.disabledOption = "x [option]"
+            self.boolean = " [x]?OR? [ ]"
             self.description = "Description\n  [description]"
             self.output = "Output\n  [output]"
             self.footer = "[↑ ↓ enter | q = quit]"
+
+    class MatrixDefault(Default):
+        def __init__(self):
+            super().__init__()
+            self.UPPERONLY = True
+            self.title = "/gx/[title]"
+            self.theme_name = "Matrix Default Theme"
+            self.theme_description = "Green on black theme"
+            self.defaultOption = "/gx/  [option]"
+            self.selectedOption = "/gx/> [option]"
+            self.disabledOption = "/gx/x [option]"
+            self.boolean = " [x]?OR? [ ]" # will be appended
+            self.description = "/gx/Description\n/gx/  [description]"
+            self.output = "/gx/Output\n/gx/  [output]"
+            self.arrows = ["/gx/▲", "/gx/▼"]
+            self.footer = "/gx/[↑ ↓ enter | q = quit]"
 
     @classproperty
     def themelist(cls) -> list[Default]:
@@ -259,7 +312,7 @@ class Themes:
         ]
 
 class Menu:
-    def __init__(self, title: str, opts: list[Option] = None, theme: Themes.Default = Themes.Default(), config: Config = Config()):
+    def __init__(self, title: str, opts: list[Option.OPTION] = None, theme: Themes.Default = Themes.Default(), config: Config = Config()):
         self.stdscr = None
         self.opts = opts or []
         self.config = config
@@ -270,14 +323,22 @@ class Menu:
         self.printmsg = ""
         self.ScrollOpts = 0
     
+    def getOptionByIndex(self, index: int) -> Option.OPTION:
+        """
+        Get an option by its index.
+        """
+        if index < len(self.opts):
+            return self.opts[index]
+        raise IndexError("Option index out of range.")
+
     def exit(self):
         self.running = False
 
-    def AddOption(self, option: Option):
-        if isinstance(option, Option):
+    def AddOption(self, option: Option.OPTION):
+        if isinstance(option, Option.OPTION):
             self.opts.append(option)
         else:
-            raise TypeError("Option must be an instance of Option class")
+            raise TypeError("Option must be an instance of Option.OPTION class")
         
     def print(self, *text: str, sep: str = " ", end:str="\n", CLEAR: bool = True):
         if CLEAR:
@@ -319,11 +380,14 @@ class Menu:
                     break
 
                 option = self.opts[j]
+                OptionNameValue = str(option)
+                if isinstance(option, Option.Boolean):
+                    OptionNameValue += self.theme.boolean.split("?OR?")[0 if option.value else 1]
 
                 if option.disabled:
-                    string = self.theme.disabledOption.replace("[option]", str(option))
+                    string = self.theme.disabledOption.replace("[option]", OptionNameValue)
                 else:
-                    string = self.theme.selectedOption.replace("[option]", str(option)) if j == self.selected else self.theme.defaultOption.replace("[option]", str(option))
+                    string = self.theme.selectedOption.replace("[option]", OptionNameValue) if j == self.selected else self.theme.defaultOption.replace("[option]", OptionNameValue)
 
                 if len(string) > w - 2:
                     string = string[:w - 2]
@@ -378,19 +442,22 @@ class Menu:
                 if ky == curses.KEY_MOUSE:
                     _, x, y, _, bstate = curses.getmouse()
 
-                    if bstate & curses.BUTTON1_CLICKED:
-                        if self.opts:
-                            if not self.opts[self.selected].disabled:
-                                self.opts[self.selected].act()
-                                self.run() if self.running else 0
-                    elif bstate & curses.BUTTON4_PRESSED:
-                        self.selected = (self.selected - 1) % len(self.opts)
-                        while self.opts[self.selected].disabled and len(self.opts) > 1:
+                    try:
+                        if bstate & curses.BUTTON1_CLICKED:
+                            if self.opts:
+                                if not self.opts[self.selected].disabled:
+                                    self.opts[self.selected].act()
+                                    self.run() if self.running else 0
+                        elif bstate & curses.BUTTON4_PRESSED:
                             self.selected = (self.selected - 1) % len(self.opts)
-                    elif bstate & curses.BUTTON5_PRESSED:
-                        self.selected = (self.selected + 1) % len(self.opts)
-                        while self.opts[self.selected].disabled and len(self.opts) > 1:
+                            while self.opts[self.selected].disabled and len(self.opts) > 1:
+                                self.selected = (self.selected - 1) % len(self.opts)
+                        elif bstate & curses.BUTTON5_PRESSED:
                             self.selected = (self.selected + 1) % len(self.opts)
+                            while self.opts[self.selected].disabled and len(self.opts) > 1:
+                                self.selected = (self.selected + 1) % len(self.opts)
+                    except:
+                        continue
                     continue
 
             # -- KEYBOARD --
@@ -412,18 +479,23 @@ class Menu:
                 stdscr.clear()
                 stdscr.refresh()
             elif ky == ord('q'):
-                self.running = False
+                self.exit()
+                curses.nocbreak()
+                curses.echo()
+                stdscr.keypad(False)
 
     def run(self):
         try:
             self.running = True
             curses.wrapper(self._main)
         except Exception as e:
-            curses.endwin()
+            if os.name == "nt":
+                curses.endwin()
             raise e
         finally:
             if self.stdscr:
-                curses.endwin()
+                if os.name == "nt":
+                    curses.endwin()
     
     def __call__(self, *args, **kwargs):
         """

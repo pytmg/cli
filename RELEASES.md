@@ -18,10 +18,10 @@
 | |V0|V1|V2|V3|
 |-|:-:|:-:|:-:|:-:|
 |Structure|Basic - Not classed.|Introduced Classes, more modular.|Fully Object Oriented|Fully Object Oriented|
-|Options|Names and functions|Names and functions|Names, Descriptions, Types|Names, Descriptions, Functions|
-|User Input|N/A|N/A|Existent|None yet|
-|Output Area|Implemented|Implemented|Dedicated|None yet|
-|Keybinds|None|None|Implemented|None|
+|Options|Names and functions|Names and functions|Names, Descriptions, Types|Names, Descriptions, Types|
+|User Input|N/A|N/A|Existent|Planned|
+|Output Area|Implemented|Implemented|Dedicated|Dedicated|
+|Keybinds|None|None|Implemented|Planned|
 |Error Handling|Good Luck|Some|Some|No Errors Found|
-|Navigation|Usable|Usable|Extended|Usable with Mouse|
+|Navigation|Usable|Usable|Usable|Usable with Mouse|
 |Customisation|Scarse|Scarse|Config - No actual customisation|Themes and colouring|

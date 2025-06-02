@@ -10,6 +10,8 @@
   - [The actual V3 docs](#the-actual-v3-docs)
     - [How to initialise a menu](#how-to-initialise-a-menu)
     - [Adding Options](#adding-options)
+      - [Callable Options](#callable-options)
+      - [Boolean Options](#boolean-options)
       - [Disabled Options](#disabled-options)
     - [THEMES](#themes)
       - [Custom Themes](#custom-themes)
@@ -19,7 +21,7 @@
 
 ## What is CLI?
 
-Essentially, CLI is a framework that's designed to help you create TUI frameworks.
+Essentially, CLI is a framework that's designed to help you create Text-based User Interface (TUI) menus.
 
 Yes, I know I used the wrong name, I can't be asked changing it.
 
@@ -59,7 +61,7 @@ To have a menu, you have to have options.
 # assuming you've done above steps from now on
 
 menu.AddOption(
-    Option( # yup, no other option types (yet)
+    Option.Callable()
         name="My custom option",
         description="Wow! Options exist!",
         action=None, # you can also pass a callable function
@@ -74,15 +76,57 @@ menu() # can use menu.run() but who cares
 
 All this really does is just add an option with the name `My custom option` and a custom description, the option does nothing (oh hey you dont need a function, that's nice.)
 
+#### Callable Options
+
+They're options that have functions attached to them, such as `menu.print` or others.
+
+They can run any valid function you give them.
+
+```python
+menu.AddOption(
+    Option.Callable(
+        name="Say hello",
+        description="Hello!",
+        action=menu.print,
+        params=("Hello, World!",)
+    )
+)
+```
+
+![Callable Option Example](./Docs/CallableOptExample.png)
+
+#### Boolean Options
+
+These options are options that are just a true and false flag, you click it to change it, not much else.
+
+Get the value with the `.value` property.
+
+```python
+menu.AddOption(
+    Option.Boolean(
+        name="True or False?",
+        description="Let's see.."
+    )
+)
+```
+
+![Inactive Boolean Option](./Docs/InactiveBooleanExample.png)
+
+You'll notice it adds a little square on the right of the name, that's part of the theme. More on that later.
+
+![Active Boolean Option](./Docs/ActiveBooleanExample.png)
+
+This one adds a little `x` to show its value.
+
 #### Disabled Options
 
 Now this is a new feature, not seen in previous versions of CLI.
 
-If you were to add `disabled=True` to an option - or rather, `option.disabled = True` you'd disable the option from being selected or ran. Very cool! It should also appear as a different colour.
+This can be applied to all option types.
+
+If you were to add `disabled=True` to an option - or `option.disabled = True` - you'd disable the option from being selected or ran. Very cool! It should also appear as a different colour.
 
 ![Disabled Options](./Docs/DisabledOptionExample.png)
-
-Hey, now that's something ELSE new, time for-
 
 ### THEMES
 
@@ -104,7 +148,7 @@ from cli import Menu, Themes, Option
 menu = Menu(title="themed menu", theme=Themes.BlueDefault())
 
 menu.AddOption(
-    Option(
+    Option.Callable(
         name="wow",
         description="what",
         action=None,

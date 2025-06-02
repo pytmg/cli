@@ -15,11 +15,12 @@ def ThemeChanger():
         selectedTheme = submenu.selected
         menu.theme = theme
         menu.theme.init() # REQUIRED otherwise it will throw a tantrum lol
+        menu.print(f"/zk/Successfully set theme to: /wk/{theme.theme_name}//")
 
     for theme in Themes.themelist: # themelist contains class references, not instances. - contains a list of all themes within the Themes class.
         thm = theme()
         submenu.AddOption(
-            Option(
+            Option.Callable(
                 f"{thm.theme_name}",
                 f"{thm.theme_description} by {thm.theme_author}//",
                 ChangeTheme,
@@ -31,8 +32,69 @@ def ThemeChanger():
 
     submenu.run()
 
+def ScrollExample():
+    submenu = Menu("Scroll Example", theme=menu.theme)
+
+    for _ in range(50):
+        submenu.AddOption(
+            Option.Callable(
+                f"Option {_+1}",
+                "I do nothing.",
+                None,
+                ()
+            )
+        )
+
+    submenu.run()
+
+def ColourExample():
+    """shows every colour in the foreground and background - not mixed, there'll be a LOT of options if they're mixed (256 options)"""
+    submenu = Menu("/rx/C/yx/o/Gx/l/gx/o/cx/u/Bx/r/bx/s//!", theme=Themes.Colourless())
+
+    codes = ["gx","Gx","bx","Bx","rx","Rx","yx","Yx","wx","mx","Mx","cx","Cx","kx","zx","xx"]
+
+    submenu.AddOption(
+            Option.Callable(
+                f"/wx/Foreground /zx/Channels//",
+                "Woah!",
+                None,
+                ()
+            )
+        )
+
+    for code in codes:
+        submenu.AddOption(
+            Option.Callable(
+                f"/{code}/{code}// (\\/{code}/)",
+                "Woah!",
+                menu.print,
+                (f"/{code}/Colour Code:", code)
+            )
+        )
+
+    submenu.AddOption(
+            Option.Callable(
+                f"/kw/Background/zk/ Channels//",
+                "Woah!",
+                None,
+                ()
+            )
+        )
+
+    for code in codes:
+        submenu.AddOption(
+            Option.Callable(
+                f"/{code[::-1]}/{code[::-1]}// (\\/{code[::-1]}/)", # str[::-1] just reverses the string
+                "Woah!",
+                submenu.print,
+                (f"/{code[::-1]}/Colour Code:", code[::-1])
+            )
+        )
+
+    submenu() # you can also do this, instead of .run(), just something i should mention :P
+
 menu.AddOption(
-    Option(
+    Option.Callable(
         "Change Theme",
         "Themes? They exist?",
         ThemeChanger, # runs the themechanger submenu
@@ -41,21 +103,61 @@ menu.AddOption(
 )
 
 menu.AddOption(
-    Option(
-        "Say Hello!",
-        "Hey!",
-        menu.print,
-        ("Hey!",)
+    Option.Callable(
+        "Open Scroll Example",
+        "Opens a menu with about 50 options.\n- If you can't scroll, either zoom in or decrease terminal size.",
+        ScrollExample,
+        ()
     )
 )
 
 menu.AddOption(
-    Option(
+    Option.Callable(
+        "Open Colour Example",
+        "Shows you all the possible colours! Ooh!",
+        ColourExample,
+        ()
+    )
+)
+
+menu.AddOption(
+    Option.Callable(
+        "Say Hello!", # Name
+        "Hey!",       # Description
+        menu.print,   # Function
+        ("Hey!",)     # Parameters (if there's only one, use a comma at the end, python will have an aneurysm if you dont)
+    )
+)
+
+menu.AddOption(
+    Option.Callable(
         "I'm disabled.",
         "Wow.",
         None,
         (),
-        disabled=True
+        disabled=True # Optional disabled flag, defaults to False.
+    )
+)
+
+menu.AddOption(
+    Option.Boolean(
+        "Boolean Option",
+        "WHAT",
+        True
+    )
+)
+
+def PrintBoolOptionValue():
+    """Prints the value of the boolean option."""
+    boolean_option = menu.getOptionByIndex(-2)
+    menu.print(f"Boolean Value: {boolean_option.value}")
+
+menu.AddOption(
+    Option.Callable(
+        "Print boolean value",
+        "Prints the value of the boolean option.",
+        PrintBoolOptionValue,
+        ()
     )
 )
 
