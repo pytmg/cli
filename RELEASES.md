@@ -22,6 +22,6 @@
 |User Input|N/A|N/A|Existent|Planned|
 |Output Area|Implemented|Implemented|Dedicated|Dedicated|
 |Keybinds|None|None|Implemented|Planned|
-|Error Handling|Good Luck|Some|Some|No Errors Found|
+|Error Handling|Good Luck|Some|Some|Plenty, except on \*NIX systems.|
 |Navigation|Usable|Usable|Usable|Usable with Mouse|
 |Customisation|Scarse|Scarse|Config - No actual customisation|Themes and colouring|
