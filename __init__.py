@@ -1,5 +1,5 @@
 """CLI-V3"""
-from typing import Callable, Union
+from typing import Callable, Union, Self
 import curses, itertools, os
 
 class classproperty(property):
@@ -95,7 +95,7 @@ class Utility:
                     continue
                 ignoreNext = False
             currentColor.AttrON(menu)
-            stdscr.addstr(y, (x+i)-offset, char.lower() if menu.theme.loweronly else (char.upper() if menu.theme.UPPERONLY else char))
+            stdscr.addstr(menu.inset + y, menu.inset + ((x+i)-offset), char.lower() if menu.theme.loweronly else (char.upper() if menu.theme.UPPERONLY else char))
             currentColor.AttrOFF(menu)
 
     @staticmethod
@@ -187,12 +187,52 @@ class Option:
         def __call__(self):
             return self.act()
 
+class Borders:
+    class Default:
+        def __init__(self):
+            self.tl = " "
+            self.tr = " "
+            self.bl = " "
+            self.br = " "
+            self.h = " "
+            self.v = " "
+            self.i = " "
+            self.td = " "
+            self.bu = " "
+
+        @property
+        def borders(cls) -> list[str]:
+            return [
+                cls.tl, cls.tr, cls.bl, cls.br,
+                cls.h, cls.v, cls.i, cls.td, cls.bu
+            ]
+
+    class V2(Default):
+        def __init__(self):
+            super().__init__()
+            self.tl = "╔"
+            self.tr = "╗"
+            self.bl = "╚"
+            self.br = "╝"
+            self.h = "═"
+            self.v = "║"
+            self.i = "╬"
+            self.td = "╦"
+            self.bu = "╩"
+
+    @classproperty
+    def borderlist(cls) -> list[Default]:
+        return [
+            member for name, member in vars(cls).items()
+            if isinstance(member, type) and issubclass(member, cls.Default)
+        ]
+
 class Themes:
     class Default:
         def __init__(self):
             # Set up all combinations of colours
             self.allpairs = "Waiting for init."
-            self.border = []
+            self.border = Borders.Default()
             self.theme_name = "Default Theme"
             self.theme_author = "__builtin__"
             self.theme_description = "This is the default theme. Uses standard colors and styles."
@@ -265,6 +305,18 @@ class Themes:
         def init(self):
             self.initcols()
 
+    class V2(Default):
+        def __init__(self):
+            super().__init__()
+            self.theme_name = "CLI-V2 theme"
+            self.theme_description = "This theme is inspired by CLI-V2."
+            self.border = Borders.V2()
+            self.selectedOption = "/kw/> [option]"
+            self.boolean = " [x]?OR? [ ]"
+            self.description = "Description\n  [description]"
+            self.output = "Output\n  [output]"
+            self.footer = "Use ↑↓ to navigate and press ENTER to select."
+
     class BlueDefault(Default):
         def __init__(self):
             super().__init__()
@@ -322,6 +374,7 @@ class Menu:
         self.running = False
         self.printmsg = ""
         self.ScrollOpts = 0
+        self.inset = 0
     
     def getOptionByIndex(self, index: int) -> Option.OPTION:
         """
@@ -357,10 +410,35 @@ class Menu:
         stdscr.clear()
         stdscr.refresh()
 
-        h, w = stdscr.getmaxyx()
+        H_, W_ = stdscr.getmaxyx()
+        W_ -= 1
+        h, w = H_, W_
+
+        if any([border != " " for border in self.theme.border.borders]):
+            self.inset = 2
+        else:
+            self.inset = 0
+
+        h -= self.inset * 2
+        w -= self.inset * 2
 
         while self.running:
             stdscr.clear()
+            if self.inset != 0:
+                # -- DRAW BORDERS -- 
+                border = self.theme.border
+                stdscr.addch(0, 0, border.tl)
+                stdscr.addch(0, W_ - 1, border.tr)
+                stdscr.addch(H_ - 1, 0, border.bl)
+                stdscr.addch(H_ - 1, W_ - 1, border.br)
+
+                for i in range(1, W_ - 1):
+                    stdscr.addch(0, i, border.h)
+                    stdscr.addch(H_ - 1, i, border.h)
+                for i in range(1, H_ - 1):
+                    stdscr.addch(i, 0, border.v)
+                    stdscr.addch(i, W_ - 1, border.v)
+
             Utility.addstr(self, 0, 0, self.theme.title.replace("[title]", self.title))
 
             # -- OPTION DISPLAY --
@@ -395,10 +473,10 @@ class Menu:
                 Utility.addstr(self, 1 + i, 0, string)
 
             if self.ScrollOpts > 0:
-                Utility.addstr(self, 1, 0 if (stdscr.inch(1, 0) & 0xFF) == ord(' ') else 1, self.theme.arrows[0])
+                Utility.addstr(self, 1, 0 if (stdscr.inch(1+self.inset, 0+self.inset) & 0xFF) == ord(' ') else 1, self.theme.arrows[0])
 
             if self.ScrollOpts + max_visible < len(self.opts):
-                Utility.addstr(self, max_visible, 0 if (stdscr.inch(max_visible, 0) & 0xFF) == ord(' ') else 1, self.theme.arrows[1])
+                Utility.addstr(self, max_visible, 0 if (stdscr.inch(max_visible+self.inset, 0+self.inset) & 0xFF) == ord(' ') else 1, self.theme.arrows[1])
 
             # -- DESCRIPTION DISPLAY --
             desc = self.opts[self.selected].description if self.opts else "No options available."
@@ -414,7 +492,7 @@ class Menu:
                 if desc_y + 1 + i < (h - 2 ):
                     Utility.addstr(self, desc_y + 1 + i, desc_x, self.theme.description.split("\n")[-1].replace("[description]", line)[:(w-desc_x)-1])
 
-            Utility.addstr(self, stdscr.getmaxyx()[0] - 1, 0, (self.theme.footer + (f"// Theme by: {self.theme.theme_author}//" if self.theme.theme_author != "__builtin__" else ""))[:w-1])
+            Utility.addstr(self, h - 1, 0, (self.theme.footer + (f"// Theme by: {self.theme.theme_author}//" if self.theme.theme_author != "__builtin__" else ""))[:w-1])
 
             # -- OUTPUT DISPLAY --
             outp = self.printmsg
@@ -475,7 +553,11 @@ class Menu:
                         self.opts[self.selected].act()
                         self.run() if self.running else 0
             elif ky == curses.KEY_RESIZE:
-                h, w = stdscr.getmaxyx()
+                H_, W_ = stdscr.getmaxyx()
+                W_ -= 1
+                h, w = H_, W_
+                h -= self.inset * 2
+                w -= self.inset * 2
                 stdscr.clear()
                 stdscr.refresh()
             elif ky == ord('q'):

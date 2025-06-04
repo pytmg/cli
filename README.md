@@ -4,7 +4,7 @@
 
 ![Total Commits](https://badgen.net/github/commits/pytmg/cli?color=black&icon=github)
 
-Made for people that don't want to use raw `curses`. (Python 3.9)
+Made for people that don't want to use raw `curses`. (Python 3.9 or 3.10 for full mouse support)
 
 It’s **super easy to use**:
 1. Download the `cli` repository.
