@@ -207,7 +207,33 @@ class Borders:
                 cls.h, cls.v, cls.i, cls.td, cls.bu
             ]
 
-    class V2(Default):
+    class SingleStroke(Default):
+        def __init__(self):
+            super().__init__()
+            self.tl = "┌"
+            self.tr = "┐"
+            self.bl = "└"
+            self.br = "┘"
+            self.h = "─"
+            self.v = "│"
+            self.i = "┼"
+            self.td = "┬"
+            self.bu = "┴"
+
+    class SingleStroke_Curved(Default):
+        def __init__(self):
+            super().__init__()
+            self.tl = "╭"
+            self.tr = "╮"
+            self.bl = "╰"
+            self.br = "╯"
+            self.h = "─"
+            self.v = "│"
+            self.i = "┼"
+            self.td = "┬"
+            self.bu = "┴"
+
+    class DoubleStroke(Default):
         def __init__(self):
             super().__init__()
             self.tl = "╔"
@@ -310,7 +336,7 @@ class Themes:
             super().__init__()
             self.theme_name = "CLI-V2 theme"
             self.theme_description = "This theme is inspired by CLI-V2."
-            self.border = Borders.V2()
+            self.border = Borders.DoubleStroke()
             self.selectedOption = "/kw/> [option]"
             self.boolean = " [x]?OR? [ ]"
             self.description = "Description\n  [description]"

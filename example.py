@@ -1,6 +1,7 @@
 # Example script for CLI-V3beta1
 
 from __init__ import Menu, Option, Themes # dont use __init__ when you're actually using the framework, use "cli"
+import CustomThemeExample # example of custom themes
 
 menu = Menu("Wow!")
 
@@ -18,6 +19,27 @@ def ThemeChanger():
         menu.print(f"/zk/Successfully set theme to: /wk/{theme.theme_name}//")
 
     for theme in Themes.themelist: # themelist contains class references, not instances. - contains a list of all themes within the Themes class.
+        thm = theme()
+        submenu.AddOption(
+            Option.Callable(
+                f"{thm.theme_name}",
+                f"{thm.theme_description} by {thm.theme_author}//",
+                ChangeTheme,
+                (thm,)
+            )
+        )
+
+    submenu.AddOption(
+        Option.Callable(
+            "Custom Themes",
+            "Separator.",
+            submenu.print
+            ("/zk/Custom Themes//"),
+            disabled=True
+        )
+    )
+
+    for theme in CustomThemeExample.CustomThemes.themelist: # Custom themes
         thm = theme()
         submenu.AddOption(
             Option.Callable(
