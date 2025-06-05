@@ -224,6 +224,9 @@ these were never asked, probably won't ever be but who am i to skip on being sch
 - Q: What version should I use?
   - A: V3. Because V2 is a bug hellhole, V1 is.. V1 and V3 just looks nice. Come on.
 
+- Q: What's the error rate?
+  - A: On Windows? Low. On \*NIX systems? Every time you exit. Don't know why, don't really care.
+
 - Q: Does this work on Mac?
   - A: ¯\\\_(ツ)\_/¯
   
@@ -231,7 +234,7 @@ these were never asked, probably won't ever be but who am i to skip on being sch
   - A:
 
 - Q: Can I add submenus?
-  - Not quite yet. I mean, you can, yes, but its VERY broken at the moment, I'll work on it soon.
+  - Yes! It works just like before. You run a submenu through an Option.Callable option and it works perfectly.
 
 - Q: How do I use V3?
   - A: You can start by reading the file you have open right now. Scroll up. READ.
