@@ -1,14 +1,27 @@
 """CLI-V3"""
-from typing import Callable, Union, Self
+from typing import Callable, Union
 import curses, itertools, os
+
+# Utility Classes
 
 class classproperty(property):
     def __get__(self, obj, objtype=None):
         return self.fget(objtype)
 
+class Char(str):
+    def __new__(cls, value: str):
+        if not isinstance(value, str) or len(value) != 1:
+            raise ValueError("Char must be a single character string")
+        return super().__new__(cls, value)
+
+# Actually useful classes
+
 class Config:
-    def __init__(self, UseMouse: bool = True):
+    def __init__(self, UseMouse: bool = True, AllowBorders: bool = True, exitkey: Char = "q", WrapWhenScrolling: bool = True):
         self.Mouse = UseMouse
+        self.Border = AllowBorders
+        self.exitkey = Char(exitkey) # will throw TypeError if its not either a single-letter string or Char instance
+        self.WrapScrollOptions = WrapWhenScrolling
 
 class Utility:
     class Colour:
@@ -255,9 +268,11 @@ class Borders:
 
 class Themes:
     class Default:
-        def __init__(self):
+        def __init__(self, autoinit: bool = False):
             # Set up all combinations of colours
             self.allpairs = "Waiting for init."
+            if autoinit:
+                self.init()
             self.border = Borders.Default()
             self.theme_name = "Default Theme"
             self.theme_author = "__builtin__"
@@ -287,7 +302,7 @@ class Themes:
             self.selectedOption = "/gx/>// [option]"
             self.boolean = " [x]?OR? [ ]"
             self.description = "Description\n  /gx/[description]"
-            self.footer = "[↑ ↓ enter | q = /gx/quit//]"
+            self.footer = "[↑ ↓ enter | [exitkey] = /gx/quit//]"
             self.output = "Output\n  /gx/[output]"
             self.arrows = ["▲", "▼"]
             self._loweronly = False
@@ -332,8 +347,8 @@ class Themes:
             self.initcols()
 
     class V2(Default):
-        def __init__(self):
-            super().__init__()
+        def __init__(self, autoinit: bool = False):
+            super().__init__(autoinit=autoinit)
             self.theme_name = "CLI-V2 theme"
             self.theme_description = "This theme is inspired by CLI-V2."
             self.border = Borders.DoubleStroke()
@@ -344,19 +359,19 @@ class Themes:
             self.footer = "Use ↑↓ to navigate and press ENTER to select."
 
     class BlueDefault(Default):
-        def __init__(self):
-            super().__init__()
+        def __init__(self, autoinit: bool = False):
+            super().__init__(autoinit=autoinit)
             self.theme_name = "Blue Default Theme"
             self.theme_description = "The default theme with blue accents rather than green."
             self.selectedOption = "/Bx/>// [option]"
             self.boolean = " [x]?OR? [ ]"
             self.description = "Description\n  /Bx/[description]"
             self.output = "Output\n  /Bx/[output]"
-            self.footer = "[↑ ↓ enter | q = /Bx/quit//]"
+            self.footer = "[↑ ↓ enter | [exitkey] = /Bx/quit//]"
 
     class Colourless(Default):
-        def __init__(self):
-            super().__init__()
+        def __init__(self, autoinit: bool = False):
+            super().__init__(autoinit=autoinit)
             self.theme_name = "Colourless Default Theme"
             self.theme_description = "The default theme without colours"
             self.selectedOption = "> [option]"
@@ -364,11 +379,11 @@ class Themes:
             self.boolean = " [x]?OR? [ ]"
             self.description = "Description\n  [description]"
             self.output = "Output\n  [output]"
-            self.footer = "[↑ ↓ enter | q = quit]"
+            self.footer = "[↑ ↓ enter | [exitkey] = quit]"
 
     class MatrixDefault(Default):
-        def __init__(self):
-            super().__init__()
+        def __init__(self, autoinit: bool = False):
+            super().__init__(autoinit=autoinit)
             self.UPPERONLY = True
             self.title = "/gx/[title]"
             self.theme_name = "Matrix Default Theme"
@@ -380,7 +395,7 @@ class Themes:
             self.description = "/gx/Description\n/gx/  [description]"
             self.output = "/gx/Output\n/gx/  [output]"
             self.arrows = ["/gx/▲", "/gx/▼"]
-            self.footer = "/gx/[↑ ↓ enter | q = quit]"
+            self.footer = "/gx/[↑ ↓ enter | [exitkey] = quit]"
 
     @classproperty
     def themelist(cls) -> list[Default]:
@@ -440,8 +455,11 @@ class Menu:
         W_ -= 1
         h, w = H_, W_
 
-        if any([border != " " for border in self.theme.border.borders]):
-            self.inset = 2
+        if self.config.Border:
+            if any([border != " " for border in self.theme.border.borders]):
+                self.inset = 2
+            else:
+                self.inset = 0
         else:
             self.inset = 0
 
@@ -518,7 +536,7 @@ class Menu:
                 if desc_y + 1 + i < (h - 2 ):
                     Utility.addstr(self, desc_y + 1 + i, desc_x, self.theme.description.split("\n")[-1].replace("[description]", line)[:(w-desc_x)-1])
 
-            Utility.addstr(self, h - 1, 0, (self.theme.footer + (f"// Theme by: {self.theme.theme_author}//" if self.theme.theme_author != "__builtin__" else ""))[:w-1])
+            Utility.addstr(self, h - 1, 0, (self.theme.footer.replace("[exitkey]", self.config.exitkey) + (f"// Theme by: {self.theme.theme_author}//" if self.theme.theme_author != "__builtin__" else ""))[:w-1])
 
             # -- OUTPUT DISPLAY --
             outp = self.printmsg
@@ -566,13 +584,23 @@ class Menu:
 
             # -- KEYBOARD --
             if ky in [curses.KEY_UP, 450]:
-                self.selected = (self.selected - 1) % len(self.opts)
-                while self.opts[self.selected].disabled and len(self.opts) > 1:
+                if self.config.WrapScrollOptions:
                     self.selected = (self.selected - 1) % len(self.opts)
+                    while self.opts[self.selected].disabled and len(self.opts) > 1:
+                        self.selected = (self.selected - 1) % len(self.opts)
+                else:
+                    self.selected -= 1
+                    if self.selected < 0:
+                        self.selected += 1
             elif ky in [curses.KEY_DOWN, 456]:
-                self.selected = (self.selected + 1) % len(self.opts)
-                while self.opts[self.selected].disabled and len(self.opts) > 1:
+                if self.config.WrapScrollOptions:
                     self.selected = (self.selected + 1) % len(self.opts)
+                    while self.opts[self.selected].disabled and len(self.opts) > 1:
+                        self.selected = (self.selected + 1) % len(self.opts)
+                else:
+                    self.selected += 1
+                    if self.selected >= len(self.opts):
+                        self.selected -= 1
             elif ky == ord('\n'):
                 if self.opts:
                     if not self.opts[self.selected].disabled:
@@ -586,7 +614,7 @@ class Menu:
                 w -= self.inset * 2
                 stdscr.clear()
                 stdscr.refresh()
-            elif ky == ord('q'):
+            elif ky == ord(self.config.exitkey):
                 self.exit()
                 curses.nocbreak()
                 curses.echo()

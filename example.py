@@ -15,11 +15,10 @@ def ThemeChanger():
         global selectedTheme
         selectedTheme = submenu.selected
         menu.theme = theme
-        menu.theme.init() # REQUIRED otherwise it will throw a tantrum lol
         menu.print(f"/zk/Successfully set theme to: /wk/{theme.theme_name}//")
 
     for theme in Themes.themelist: # themelist contains class references, not instances. - contains a list of all themes within the Themes class.
-        thm = theme()
+        thm = theme(autoinit=True)
         submenu.AddOption(
             Option.Callable(
                 f"{thm.theme_name}",
