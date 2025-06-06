@@ -558,6 +558,26 @@ class Menu:
 
             # -- KEYBOARD AND MOUSE HANDLERS --
             ky = stdscr.getch()
+
+            def handleUp():
+                if self.config.WrapScrollOptions:
+                    self.selected = (self.selected - 1) % len(self.opts)
+                    while self.opts[self.selected].disabled and len(self.opts) > 1:
+                        self.selected = (self.selected - 1) % len(self.opts)
+                else:
+                    self.selected -= 1
+                    if self.selected < 0:
+                        self.selected += 1
+
+            def handleDown():
+                if self.config.WrapScrollOptions:
+                    self.selected = (self.selected + 1) % len(self.opts)
+                    while self.opts[self.selected].disabled and len(self.opts) > 1:
+                        self.selected = (self.selected + 1) % len(self.opts)
+                else:
+                    self.selected += 1
+                    if self.selected >= len(self.opts):
+                        self.selected -= 1
             
             # -- MOUSE --
             if self.config.Mouse:
@@ -571,36 +591,18 @@ class Menu:
                                     self.opts[self.selected].act()
                                     self.run() if self.running else 0
                         elif bstate & curses.BUTTON4_PRESSED:
-                            self.selected = (self.selected - 1) % len(self.opts)
-                            while self.opts[self.selected].disabled and len(self.opts) > 1:
-                                self.selected = (self.selected - 1) % len(self.opts)
+                            handleUp()
                         elif bstate & curses.BUTTON5_PRESSED:
-                            self.selected = (self.selected + 1) % len(self.opts)
-                            while self.opts[self.selected].disabled and len(self.opts) > 1:
-                                self.selected = (self.selected + 1) % len(self.opts)
+                            handleDown()
                     except:
                         continue
                     continue
 
             # -- KEYBOARD --
             if ky in [curses.KEY_UP, 450]:
-                if self.config.WrapScrollOptions:
-                    self.selected = (self.selected - 1) % len(self.opts)
-                    while self.opts[self.selected].disabled and len(self.opts) > 1:
-                        self.selected = (self.selected - 1) % len(self.opts)
-                else:
-                    self.selected -= 1
-                    if self.selected < 0:
-                        self.selected += 1
+                handleUp()
             elif ky in [curses.KEY_DOWN, 456]:
-                if self.config.WrapScrollOptions:
-                    self.selected = (self.selected + 1) % len(self.opts)
-                    while self.opts[self.selected].disabled and len(self.opts) > 1:
-                        self.selected = (self.selected + 1) % len(self.opts)
-                else:
-                    self.selected += 1
-                    if self.selected >= len(self.opts):
-                        self.selected -= 1
+                handleDown()
             elif ky == ord('\n'):
                 if self.opts:
                     if not self.opts[self.selected].disabled:
