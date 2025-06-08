@@ -164,8 +164,8 @@ class Option:
             self.disabled = disabled
 
         def act(self):
-            if callable(self.action):
-                self.action(*self.params)
+            if callable(self.action) and not self.disabled: # just in case
+                return self.action(*self.params)
 
         def __str__(self):
             return self.name
@@ -173,7 +173,10 @@ class Option:
         def __dict__(self):
             return {
                 "name": self.name,
-                "description": self.description
+                "description": self.description,
+                "func": self.action,
+                "params": self.params,
+                "disabled": self.disabled
             }
         
         def __call__(self):
@@ -186,6 +189,7 @@ class Option:
 
         def act(self):
             self.value = not self.value
+            return self.value
 
         def __str__(self):
             return self.name
@@ -194,7 +198,8 @@ class Option:
             return {
                 "name": self.name,
                 "description": self.description,
-                "value": self.value
+                "value": self.value,
+                "disabled": self.disabled
             }
         
         def __call__(self):
@@ -464,6 +469,27 @@ class Menu:
             self.inset = 0
 
         h -= self.inset * 2
+
+        def handleUp():
+            if self.config.WrapScrollOptions:
+                self.selected = (self.selected - 1) % len(self.opts)
+                while self.opts[self.selected].disabled and len(self.opts) > 1:
+                    self.selected = (self.selected - 1) % len(self.opts)
+            else:
+                self.selected -= 1
+                if self.selected < 0:
+                    self.selected += 1
+
+        def handleDown():
+            if self.config.WrapScrollOptions:
+                self.selected = (self.selected + 1) % len(self.opts)
+                while self.opts[self.selected].disabled and len(self.opts) > 1:
+                    self.selected = (self.selected + 1) % len(self.opts)
+            else:
+                self.selected += 1
+                if self.selected >= len(self.opts):
+                    self.selected -= 1
+                    
         w -= self.inset * 2
 
         while self.running:
@@ -558,26 +584,6 @@ class Menu:
 
             # -- KEYBOARD AND MOUSE HANDLERS --
             ky = stdscr.getch()
-
-            def handleUp():
-                if self.config.WrapScrollOptions:
-                    self.selected = (self.selected - 1) % len(self.opts)
-                    while self.opts[self.selected].disabled and len(self.opts) > 1:
-                        self.selected = (self.selected - 1) % len(self.opts)
-                else:
-                    self.selected -= 1
-                    if self.selected < 0:
-                        self.selected += 1
-
-            def handleDown():
-                if self.config.WrapScrollOptions:
-                    self.selected = (self.selected + 1) % len(self.opts)
-                    while self.opts[self.selected].disabled and len(self.opts) > 1:
-                        self.selected = (self.selected + 1) % len(self.opts)
-                else:
-                    self.selected += 1
-                    if self.selected >= len(self.opts):
-                        self.selected -= 1
             
             # -- MOUSE --
             if self.config.Mouse:
@@ -618,22 +624,22 @@ class Menu:
                 stdscr.refresh()
             elif ky == ord(self.config.exitkey):
                 self.exit()
-                curses.nocbreak()
-                curses.echo()
-                stdscr.keypad(False)
+
+        stdscr.keypad(False)
+        curses.cbreak()
+        curses.echo()
 
     def run(self):
         try:
             self.running = True
             curses.wrapper(self._main)
+        except curses.error as ce:
+            if "endwin" in str(ce).lower():
+                pass
+            else:
+                raise ce
         except Exception as e:
-            if os.name == "nt":
-                curses.endwin()
             raise e
-        finally:
-            if self.stdscr:
-                if os.name == "nt":
-                    curses.endwin()
     
     def __call__(self, *args, **kwargs):
         """

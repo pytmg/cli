@@ -32,8 +32,8 @@ def ThemeChanger():
         Option.Callable(
             "Custom Themes",
             "Separator.",
-            submenu.print
-            ("/zk/Custom Themes//"),
+            submenu.print,
+            ("/zk/Custom Themes//",),
             disabled=True
         )
     )

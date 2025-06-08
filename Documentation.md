@@ -254,4 +254,5 @@ these were never asked, probably won't ever be but who am i to skip on being sch
 - colour code parser may be sentient, oops
 - TODO: create an eyesore theme
 - TODO: get more than 23 minutes of sleep
-- TODO: scrap that i need to work on the submenu support
+- ~~TODO: scrap that i need to work on the submenu support~~ i did it (hooray)
+- ~~TODO: Fix linux shenanagins~~ it doesnt have 32 seizures anymore (hurrah)
