@@ -12,6 +12,7 @@
     - [Adding Options](#adding-options)
       - [Callable Options](#callable-options)
       - [Boolean Options](#boolean-options)
+      - [Input Options](#input-options)
       - [Disabled Options](#disabled-options)
     - [THEMES](#themes)
       - [Custom Themes](#custom-themes)
@@ -117,6 +118,30 @@ You'll notice it adds a little square on the right of the name, that's part of t
 ![Active Boolean Option](./Docs/ActiveBooleanExample.png)
 
 This one adds a little `x` to show its value.
+
+#### Input Options
+
+At the moment, there's only string options (soon there's gonna be ints but i cant be asked rn).
+
+**What does this do?**
+
+Literally lets you prompt the user with an input, they can type whatever they want within a string length limit you set yourself.
+
+![Input Option](./Docs/ShowingInputOption.png)
+
+As you see here, there's a little preview of the current value, and you can get it with `.value` like [booleans](#boolean-options).
+
+Here's what you might see when you want to input something.
+
+![Input Example](./Docs/InputExample.png)
+
+Let's change the input, "Really cool text" should suffice.
+
+![Input Example 2](./Docs/InputExample2.png)
+
+And now, as you can see, both the preview and value have been updated, we can see this value if we press the `Print Input Value` option.
+
+![Input Example 3](./Docs/InputExample3.png)
 
 #### Disabled Options
 
@@ -225,7 +250,7 @@ these were never asked, probably won't ever be but who am i to skip on being sch
   - A: V3. Because V2 is a bug hellhole, V1 is.. V1 and V3 just looks nice. Come on.
 
 - Q: What's the error rate?
-  - A: On Windows? Low. On \*NIX systems? Every time you exit. Don't know why, don't really care.
+  - A: On Windows? Low. ~~On \*NIX systems? Every time you exit. Don't know why, don't really care.~~ NEVERMIND - IT WORKS PERFECTLY FINE NOW (yay)
 
 - Q: Does this work on Mac?
   - A: ¯\\\_(ツ)\_/¯

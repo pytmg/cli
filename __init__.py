@@ -44,6 +44,12 @@ class Utility:
             menu.stdscr.attroff(curses.color_pair(theme.GetPair(self.fg, self.bg)))
 
     @staticmethod
+    def truncate(string: str, length: int, addellipsis: bool = True) -> str:
+        if len(string) > length:
+            return string[:length - 3] + ("..." if addellipsis else "")
+        return string
+
+    @staticmethod
     def addstr(menu, y: int, x: int, string: str):
         stdscr = menu.stdscr
         offset = 0
@@ -142,8 +148,38 @@ class Utility:
         
         return pair_mapping
 
+class Input:
+    class String:
+        def __init__(self, prompt: str = "Input: ", default: str = "", max_length: int = 100):
+            self.prompt = prompt
+            self.default = default
+            self.max_length = max_length
+        
+        def get(self, stdscr: curses.window) -> str:
+            stdscr.clear()
+            current = self.default
+            stdscr.addstr(0, 0, self.prompt + current)
+            while True:
+                stdscr.refresh()
+                stdscr.clear()
+                stdscr.addstr(0, 0, self.prompt + current)
+                key = stdscr.getch()
+                if key in [curses.KEY_BACKSPACE, 127, 8]:  # Handle backspace
+                    current = current[:-1]
+                elif key == curses.KEY_ENTER or key == 10 or key == 13:  # Enter key
+                    break
+                elif key == curses.KEY_RESIZE:
+                    h, w = stdscr.getmaxyx()
+                    stdscr.resize(h, w)
+                elif len(current) < self.max_length and (key >= 32 and key <= 126):  # Printable characters
+                    current += chr(key)
+                elif key == 27:  # Escape key
+                    return self.default  # Return default on escape
+            return current[:self.max_length]
+
 class Option:
     class OPTION:
+        """Base Class."""
         def __init__(self, name: str, description: str, action: Callable = None, params: tuple = (), disabled: bool = False, value: Union[bool, None] = None):
             self.name = name
             self.description = description
@@ -204,6 +240,35 @@ class Option:
         
         def __call__(self):
             return self.act()
+        
+    class INPUT(OPTION):
+        def __init__(self):
+            self.name = ""
+            self.description = ""
+            self.prompt = ""
+            self.disabled = False
+            self.value = ""
+            self.maxlen = 0
+
+        def act(self, stdscr: curses.window) -> str:
+            raise NotImplementedError("act method must be implemented in subclasses of INPUT.")
+            
+    class String(INPUT):
+        def __init__(self, name: str, description: str, default: str = "", max_length: int = 30, disabled: bool = False, prompt: str = "Input: "):
+            self.name = name
+            self.description = description
+            self.value = default
+            self.max_length = max_length
+            self.disabled = disabled
+            self.prompt = prompt
+
+        def __str__(self):
+            return self.name
+
+        def act(self, stdscr: curses.window) -> str:
+            input_instance = Input.String(prompt=self.prompt, default=self.value, max_length=self.max_length)
+            self.value = input_instance.get(stdscr)
+            return self.value
 
 class Borders:
     class Default:
@@ -305,6 +370,7 @@ class Themes:
             self.defaultOption = "  [option]"
             self.disabledOption = "  /zx/[option]//"
             self.selectedOption = "/gx/>// [option]"
+            self.inp = " /zx/[[val]]//"
             self.boolean = " [x]?OR? [ ]"
             self.description = "Description\n  /gx/[description]"
             self.footer = "[↑ ↓ enter | [exitkey] = /gx/quit//]"
@@ -531,6 +597,8 @@ class Menu:
                 OptionNameValue = str(option)
                 if isinstance(option, Option.Boolean):
                     OptionNameValue += self.theme.boolean.split("?OR?")[0 if option.value else 1]
+                elif isinstance(option, Option.INPUT):
+                    OptionNameValue += self.theme.inp.replace("[val]", Utility.truncate(option.value, 10, True) if option.value else "")
 
                 if option.disabled:
                     string = self.theme.disabledOption.replace("[option]", OptionNameValue)
@@ -612,7 +680,10 @@ class Menu:
             elif ky == ord('\n'):
                 if self.opts:
                     if not self.opts[self.selected].disabled:
-                        self.opts[self.selected].act()
+                        if isinstance(self.opts[self.selected], Option.INPUT):
+                            self.opts[self.selected].act(stdscr)
+                        else:
+                            self.opts[self.selected].act()
                         self.run() if self.running else 0
             elif ky == curses.KEY_RESIZE:
                 H_, W_ = stdscr.getmaxyx()
@@ -622,7 +693,7 @@ class Menu:
                 w -= self.inset * 2
                 stdscr.clear()
                 stdscr.refresh()
-            elif ky == ord(self.config.exitkey):
+            elif ky in [ord(keykey) for keykey in [self.config.exitkey.upper(), self.config.exitkey.lower()]]:
                 self.exit()
 
         stdscr.keypad(False)

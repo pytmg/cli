@@ -168,9 +168,11 @@ menu.AddOption(
     )
 )
 
+BoolIDX = len(menu.opts) - 1
+
 def PrintBoolOptionValue():
     """Prints the value of the boolean option."""
-    boolean_option = menu.getOptionByIndex(-2)
+    boolean_option = menu.getOptionByIndex(BoolIDX)
     menu.print(f"Boolean Value: {boolean_option.value}")
 
 menu.AddOption(
@@ -178,6 +180,30 @@ menu.AddOption(
         "Print boolean value",
         "Prints the value of the boolean option.",
         PrintBoolOptionValue,
+        ()
+    )
+)
+
+menu.AddOption(
+    Option.String(
+        "Input example",
+        "Woah?",
+        "Lorem ipsum.",
+        100,
+        False,
+        "Enter some very nice text\n  -> "
+    )
+)
+
+def printthisvalue():
+    option = menu.getOptionByIndex(-2) # gets the last option, which is the input option
+    menu.print(f"You entered: {option.value}") # prints the value of the input option
+
+menu.AddOption(
+    Option.Callable(
+        "Print Input Value",
+        "Prints the value of the input option.",
+        printthisvalue,
         ()
     )
 )

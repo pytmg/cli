@@ -9,7 +9,7 @@
   - Looks way better! Using "curses" and has more general improvements.
     - Curses is used to allow more control over the UI and how everything looks.
 
-# V3-beta1 - The Themes Edition
+# V3 - The Themes Edition
   - Complete rework, looks SO much better, also uses "curses" and has far more improvements compared to V2. Added mouse support.
 
 > [!NOTE]
@@ -19,7 +19,7 @@
 |-|:-:|:-:|:-:|:-:|
 |Structure|Basic - Not classed.|Introduced Classes, more modular.|Fully Object Oriented|Fully Object Oriented|
 |Options|Names and functions|Names and functions|Names, Descriptions, Types|Names, Descriptions, Types|
-|User Input|N/A|N/A|Existent|Planned|
+|User Input|N/A|N/A|Existent|Exists|
 |Output Area|Implemented|Implemented|Dedicated|Dedicated|
 |Keybinds|None|None|Implemented|Planned|
 |Error Handling|Good Luck|Some|Some|Plenty, except on \*NIX systems.|
