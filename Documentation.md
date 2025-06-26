@@ -62,7 +62,7 @@ To have a menu, you have to have options.
 # assuming you've done above steps from now on
 
 menu.AddOption(
-    Option.Callable()
+    Option.Callable(
         name="My custom option",
         description="Wow! Options exist!",
         action=None, # you can also pass a callable function
