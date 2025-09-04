@@ -123,6 +123,23 @@ This one adds a little `x` to show its value.
 
 At the moment, there's only string options (soon there's gonna be ints but i cant be asked rn).
 
+You can use `Option.String` to get a string input from the user. in the future, this will have `Int` too, as it's planned.
+
+Like this:
+
+```py
+menu.AddOption(
+    Option.String( # its a weird order but can i be asked to care
+        name="Write an input",
+        description="Wow, inputs? They exist?",
+        default="Default input",
+        max_length=100, # max input length
+        disabled=False,
+        prompt="Input: "
+    )
+)
+```
+
 **What does this do?**
 
 Literally lets you prompt the user with an input, they can type whatever they want within a string length limit you set yourself.
