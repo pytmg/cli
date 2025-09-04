@@ -17,7 +17,7 @@ If you do decide, for some reason, to work with it, then, good job? I guess?
 
 ## DO NOT USE V0.
 
-It sucks, I have, however tried to add comments where applicable, but really, its just extra work. Seriously, I hated using V0, hence the existance for V1.
+It sucks. I have, however tried to add comments where applicable, but really, its just extra work. Seriously, I hated using V0, hence the existance for V1.
 
 :)
 
