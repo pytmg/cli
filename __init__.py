@@ -1,6 +1,6 @@
 """CLI-V3"""
 from typing import Callable, Union
-import curses, itertools, os
+import curses, itertools
 
 # Utility Classes
 
@@ -370,7 +370,7 @@ class Themes:
             self.defaultOption = "  [option]"
             self.disabledOption = "  /zx/[option]//"
             self.selectedOption = "/gx/>// [option]"
-            self.inp = " /zx/[[val]]//"
+            self.inp = " /zx/[[val]/zx/]//"
             self.boolean = " [x]?OR? [ ]"
             self.description = "Description\n  /gx/[description]"
             self.footer = "[↑ ↓ enter | [exitkey] = /gx/quit//]"
