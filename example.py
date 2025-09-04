@@ -13,16 +13,26 @@ def ThemeChanger():
     def ChangeTheme(theme: Themes.Default): # all themes are based off Default
         submenu.exit() # exits current menu and goes to parent.
         global selectedTheme
-        selectedTheme = submenu.selected
+        selectedTheme = submenu.selected - 1
         menu.theme = theme
         menu.print(f"/zk/Successfully set theme to: /wk/{theme.theme_name}//")
+
+    submenu.AddOption(
+        Option.Callable(
+            "Built-in Themes",
+            "Separator.",
+            submenu.print,
+            ("/zk/Built-ins//",),
+            disabled=True
+        )
+    )
 
     for theme in Themes.themelist: # themelist contains class references, not instances. - contains a list of all themes within the Themes class.
         thm = theme(autoinit=True)
         submenu.AddOption(
             Option.Callable(
                 f"{thm.theme_name}",
-                f"{thm.theme_description} by {thm.theme_author}//",
+                f"{thm.theme_description}//",
                 ChangeTheme,
                 (thm,)
             )
@@ -49,14 +59,14 @@ def ThemeChanger():
             )
         )
 
-    submenu.selected = selectedTheme
+    submenu.selected = selectedTheme + 1
 
     submenu.run()
 
 def ScrollExample():
     submenu = Menu("Scroll Example", theme=menu.theme)
 
-    for _ in range(50):
+    for _ in range(100):
         submenu.AddOption(
             Option.Callable(
                 f"Option {_+1}",
@@ -72,7 +82,7 @@ def ColourExample():
     """shows every colour in the foreground and background - not mixed, there'll be a LOT of options if they're mixed (256 options)"""
     submenu = Menu("/rx/C/yx/o/Gx/l/gx/o/cx/u/Bx/r/bx/s//!", theme=Themes.Colourless())
 
-    codes = ["gx","Gx","bx","Bx","rx","Rx","yx","Yx","wx","mx","Mx","cx","Cx","kx","zx","xx"]
+    codes = ["gx","Gx","bx","Bx","rx","Rx","yx","Yx","mx","Mx","cx","Cx","kx","zx","wx","xx"]
 
     submenu.AddOption(
             Option.Callable(
